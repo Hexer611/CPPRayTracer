@@ -3,23 +3,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ErdemCPPRayTracer", "ErdemCPPRayTracer.vcxproj", "{43CAC516-359D-49B9-A93A-0BC5B5E43FC7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ErdemCPPRayTracer", "ErdemCPPRayTracer.vcxproj", "{E415A50E-D101-41FB-A281-2D8A9A8D50FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{43CAC516-359D-49B9-A93A-0BC5B5E43FC7}.Debug|x64.ActiveCfg = Debug|x64
-		{43CAC516-359D-49B9-A93A-0BC5B5E43FC7}.Debug|x64.Build.0 = Debug|x64
-		{43CAC516-359D-49B9-A93A-0BC5B5E43FC7}.Release|x64.ActiveCfg = Release|x64
-		{43CAC516-359D-49B9-A93A-0BC5B5E43FC7}.Release|x64.Build.0 = Release|x64
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Debug|x64.ActiveCfg = Debug|x64
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Debug|x64.Build.0 = Debug|x64
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Debug|x86.ActiveCfg = Debug|Win32
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Debug|x86.Build.0 = Debug|Win32
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Release|x64.ActiveCfg = Release|x64
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Release|x64.Build.0 = Release|x64
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Release|x86.ActiveCfg = Release|Win32
+		{E415A50E-D101-41FB-A281-2D8A9A8D50FF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4951E2EF-28E2-43DC-A9E9-C8F84BFB1B92}
+		SolutionGuid = {680AD2A4-ED77-485B-9173-2CDBC3C9FD5C}
 	EndGlobalSection
 EndGlobal
