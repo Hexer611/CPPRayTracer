@@ -5,8 +5,8 @@
 class Renderer {
 public:
 	Renderer(Window& window);
-	void beginFrame1();
-	void endFrame1();
+	void setRenderTarget(ID3D11RenderTargetView* m_renderTargetView);
+	void Present();
 	void beginFrame2();
 	void endFrame2();
 	void saveRenderTexture();
@@ -15,6 +15,10 @@ public:
 
 	ID3D11Texture2D* renderTextureMain;
 	D3D11_TEXTURE2D_DESC m_backBufferDesc;
+
+	// Render targets
+	ID3D11RenderTargetView* m_accumulateTargetView = nullptr;
+	ID3D11RenderTargetView* m_renderTargetView = nullptr;
 private:
 
 	void createDevice(Window& window);
@@ -24,8 +28,4 @@ private:
 	IDXGISwapChain* m_swapChain = nullptr;
 	ID3D11Device* m_device = nullptr;
 	ID3D11DeviceContext* m_deviceContext = nullptr;
-
-	// Render target
-	ID3D11RenderTargetView* m_accumulateTargetView = nullptr;
-	ID3D11RenderTargetView* m_renderTargetView = nullptr;
 };

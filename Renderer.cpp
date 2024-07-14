@@ -60,7 +60,7 @@ void Renderer::createRenderTarget()
 	m_device->CreateTexture2D(&textureDesc, nullptr, &renderTextureMain);
 }
 
-void Renderer::beginFrame1()
+void Renderer::setRenderTarget(ID3D11RenderTargetView* currentTarget)
 {
 	// Bind render target
 	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, nullptr);
@@ -74,7 +74,7 @@ void Renderer::beginFrame1()
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 }
 
-void Renderer::endFrame1()
+void Renderer::Present()
 {
 	m_swapChain->Present(1, 0);
 }

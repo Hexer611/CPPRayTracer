@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Triangle.h"
 #include "Accumulator.h"
+#include "TextureUtils.h"
 
 #define MAX_NAME_STRING 256
 #define HInstance() GetModuleHandle(NULL)
@@ -19,6 +20,15 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	Renderer renderer(window);
 	Triangle triangle(renderer);
 	Accumulator accumulator(renderer);
+	TextureUtils textureUtil(renderer.m_backBufferDesc, renderer.getDevice());
+
+	ID3D11Texture2D* resultTexture;
+	ID3D11RenderTargetView* resultTextureView;
+
+	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
+	textureUtil.rayTracerRenderTexture = resultTexture;
+	textureUtil.rayTracerRenderTextureView = resultTextureView;
+	//textureUtil.createRenderTextureView(&textureUtil.accumulateRenderTexture, &textureUtil.accumulateRenderTextureView);
 
 	MSG msg = { 0 };
 	while (true)
@@ -37,13 +47,13 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		// Main loop
 		// Update
 		// Draw
-		renderer.beginFrame1();
+		renderer.setRenderTarget(textureUtil.accumulateRenderTextureView);
 		triangle.draw(renderer);
-		renderer.saveRenderTexture();
+		//renderer.saveRenderTexture();
 
 		//renderer.beginFrame1();
-		accumulator.draw(renderer);
-		renderer.endFrame1();
+		//accumulator.draw(renderer);
+		renderer.Present();
 	}
 
 	return 0;

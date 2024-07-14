@@ -144,6 +144,7 @@
     <ClCompile Include="Accumulator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="TextureUtils.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="Accumulator.h" />
     <ClInclude Include="DataTypes.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="TextureUtils.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
