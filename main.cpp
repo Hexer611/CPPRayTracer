@@ -35,9 +35,9 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		// Main loop
 		// Update
 		// Draw
-		renderer.beginFrame();
+		renderer.beginFrame1();
 		triangle.draw(renderer);
-		renderer.endFrame();
+		renderer.endFrame1();
 	}
 
 	return 0;

@@ -1,5 +1,5 @@
 #include "Renderer.h"
-
+#include "D3DX11tex.h"
 
 Renderer::Renderer(Window& window)
 {
@@ -42,9 +42,25 @@ void Renderer::createRenderTarget()
 
 	backBuffer->GetDesc(&m_backBufferDesc);
 	backBuffer->Release();
+
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textureDesc.Width = m_backBufferDesc.Width;
+	textureDesc.Height = m_backBufferDesc.Height;
+	textureDesc.Format = m_backBufferDesc.Format;
+
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = 0;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+	textureDesc.SampleDesc.Quality = 0;
+
+	m_device->CreateTexture2D(&textureDesc, nullptr, &renderTextureMain);
 }
 
-void Renderer::beginFrame()
+void Renderer::beginFrame1()
 {
 	// Bind render target
 	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, nullptr);
@@ -58,11 +74,38 @@ void Renderer::beginFrame()
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 }
 
-void Renderer::endFrame()
+void Renderer::endFrame1()
 {
 	m_swapChain->Present(1, 0);
+
+	ID3D11Resource* backResource;
+	m_renderTargetView->GetResource(&backResource);
+	m_deviceContext->CopyResource(renderTextureMain, backResource);
+
+	auto res = D3DX11SaveTextureToFile(m_deviceContext, renderTextureMain, D3DX11_IFF_DDS, "C:/Users/Administrator/Desktop/test/erdem.png");
+
+	backResource->Release();
 }
 
+void Renderer::beginFrame2()
+{
+	// Bind render target
+	m_deviceContext->OMSetRenderTargets(1, &m_accumulateTargetView, nullptr);
+
+	// Set viewpot
+	auto viewPort = CD3D11_VIEWPORT(0.f, 0.f, (float)m_backBufferDesc.Width, (float)m_backBufferDesc.Height);
+	m_deviceContext->RSSetViewports(1, &viewPort);
+
+	// Set the background color
+	float clearColor[] = { .25f, .5f, 1, 1 };
+	m_deviceContext->ClearRenderTargetView(m_accumulateTargetView, clearColor);
+}
+
+void Renderer::endFrame2()
+{
+	m_swapChain->Present(1, 0);
+	m_deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+}
 
 ID3D11Device* Renderer::getDevice()
 {

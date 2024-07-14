@@ -1,11 +1,8 @@
 float3 ViewParams;
 float4x4 CamLocalToWorldMatrix;
-int NumSpheres = 1;
 int NumMeshes;
 int NumTriangles;
 int MaxBounceCount = 1;
-int NumberOfRaysPerPixel = 1;
-int Frame;
 
 float _boxThreshold;
 float _triThreshold;
@@ -19,6 +16,14 @@ float3 SunColor;
 float SunFocus;
 float SunIntensity;
 float EnvironmentIntensity;
+
+cbuffer ErdemBuff : register(b0)
+{
+    int Frame;
+    int NumSpheres;
+    float NumberOfRaysPerPixel;
+    float _1f;
+};
 
 struct appdata
 {
@@ -43,8 +48,9 @@ struct RayTracingMaterial
 	float4 color;
 	float4 emissionColor;
 	float emissionStrength;
-	float smoothness;
-	float specularProbability;
+    float smoothness;
+    float specularProbability;
+    float _;
 	float4 specularColor;
 };
 
@@ -94,7 +100,10 @@ struct Sphere
 	RayTracingMaterial material;
 };
 
-Sphere Spheres[1];
+cbuffer Buffer1 : register(b1)
+{
+    Sphere Spheres[4];
+};
 
 Triangle Triangles[1];
 MeshInfo Meshes[1];
@@ -224,22 +233,6 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 	HitInfo closestHit = (HitInfo)0;
 	closestHit.dst = 1.#INF;
 	
-	int NumSpheres = 2;
-	Sphere Spheres[2];
-	Spheres[0].position = float3(0,0,10);
-	Spheres[0].radius = 1;
-	Spheres[0].material.color = float4(0,0,1,1);
-	Spheres[0].material.specularProbability = 0;
-	Spheres[0].material.smoothness = 0;
-	//Spheres[0].material.emissionColor = float4(0,0,1,1);
-	//Spheres[0].material.emissionStrength = 1;
-	
-	Spheres[1].position = float3(3,0,10);
-	Spheres[1].radius = 1;
-	Spheres[1].material.color = float4(0,1,0,1);
-	Spheres[1].material.specularProbability = 1;
-	Spheres[1].material.smoothness = 1;
-
 	for (int i = 0; i < NumSpheres; i++)
 	{
 		Sphere sphere = Spheres[i];
@@ -274,9 +267,9 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 int NextRandom(inout int state)
 {
 	state = state * 747796405 + 2891336453;
-	//int result = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
-	//result = (result >> 22) ^ result;
-	int result = state * state;
+	int result = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
+	result = (result >> 22) ^ result;
+	//int result = state * state;
 	return result;
 }
 
@@ -334,12 +327,12 @@ float3 Trace(Ray ray, inout int rngState)
 	float3 rayColor = 1;
 	//bool hasHit = false;
 	int2 stats = 0;
-	int MaxBounceCount = 3;
+	int MaxBounceCount = 1;
 	
 	for (int i = 0; i <= MaxBounceCount; i++)
 	{
 		HitInfo hitInfo = CalculateRayCollision(ray, stats);
-
+		
 		if (hitInfo.didHit)
 		{
 			ray.origin = hitInfo.hitPoint;
@@ -347,7 +340,7 @@ float3 Trace(Ray ray, inout int rngState)
 			bool isSpecularBounce = material.specularProbability >= RandomValue(rngState);
 			float3 diffuseDir = normalize(hitInfo.normal + RandomDirection(rngState));
 			float3 specularDir = reflect(ray.dir, hitInfo.normal);
-			ray.dir = specularDir;//normalize(lerp(diffuseDir, specularDir, material.smoothness * isSpecularBounce));
+            ray.dir = diffuseDir; //normalize(lerp(diffuseDir, specularDir, material.smoothness * isSpecularBounce));
 
 			float3 emittedLight =  material.emissionColor * material.emissionStrength;
 			incomingLight += emittedLight * rayColor;
@@ -360,9 +353,9 @@ float3 Trace(Ray ray, inout int rngState)
 			}
 			rayColor *= 1.0f / p;
 			//hasHit = true;
-		}
+        }
 		else
-		{
+        {
 			incomingLight += GetEnvironmentLight(ray) * rayColor;
 			/*if (hasHit)
 				incomingLight += GetEnvironmentLight(ray) * rayColor;
@@ -370,11 +363,11 @@ float3 Trace(Ray ray, inout int rngState)
 				incomingLight += GetEnvironmentBackGround(ray);
 			*/
 		}
-	}
-
+    }
+    
 	float boxVis = stats[0] / _boxThreshold;
 	float triVis = stats[1] / _triThreshold;
-	return float4(stats[0] / 10.0,0,0,1);
+	//return float4(stats[0] / 10.0,0,0,1);
 
 	int _testType = 3;
 	switch (_testType)
@@ -463,15 +456,14 @@ float4 main(Input input) : SV_TARGET
 	float screenWidth = 584.0;
 	float screenHeight = 361.0;
 	float2 numPixels = float2(screenWidth, screenHeight);
-	int2 _pixelCoord = int2((input.position.x + 1) / 2, (input.position.y + 1) / 2);
+	int2 _pixelCoord = int2(input.position.x, input.position.y);
 	float2 pixelCoord = float2(_pixelCoord.x / numPixels.x, _pixelCoord.y / numPixels.y);
-	pixelCoord *= 2;
 	pixelCoord.y = 1 - pixelCoord.y;
 
-	int pixelIndex = pixelCoord.y * numPixels.x + pixelCoord.x;
-	int rngState = pixelIndex + Frame * 719393;
+    int pixelIndex = _pixelCoord.y * numPixels.x + _pixelCoord.x;
+    int rngState = pixelIndex + Frame * 1000;
 	
-	float cameraFOV = 45.0;
+	float cameraFOV = 60.0;
 	float farPlane = 1000.0;
 	float nearPlane = 1.0;
 	float aspectRatio = screenWidth / screenHeight;
@@ -497,11 +489,11 @@ float4 main(Input input) : SV_TARGET
 
 	float3 totalLight = 0;
 
-	for (int i = 0 ; i < 1; i++)
+    for (int i = 0; i < NumberOfRaysPerPixel; i++)
 	{
 		totalLight += Trace(ray, rngState);
 	}
 
-	float3 pixelColor = totalLight / 1;
+    float3 pixelColor = totalLight / NumberOfRaysPerPixel;
 	return float4( pixelColor.xyz, 1.0);
 }
