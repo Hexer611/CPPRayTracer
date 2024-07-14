@@ -16,7 +16,6 @@ Triangle::~Triangle()
 	m_vertexBuffer->Release();
 	m_vertexShader->Release();
 	m_pixelShader->Release();
-	m_pixelShader1->Release();
 	m_inputLayout->Release();
 }
 
@@ -71,47 +70,6 @@ void Triangle::updateRenderData(ID3D11DeviceContext* deviceContext)
 	deviceContext->PSSetConstantBuffers(0, 1, &m_constantBuffer);
 }
 
-void Triangle::draw(Renderer& renderer)
-{
-	auto deviceContext = renderer.getDeviceContext();
-
-	// Bind shaders
-	deviceContext->IASetInputLayout(m_inputLayout);
-	deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
-	deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
-
-	// Bind our vertex buffer
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-
-	// Update our constant buffer
-	Triangle::updateRenderData(deviceContext);
-
-	// Draw
-	deviceContext->Draw(6, 0);
-}
-
-void Triangle::draw2(Renderer& renderer)
-{
-	auto deviceContext = renderer.getDeviceContext();
-
-	// Bind shaders
-	deviceContext->IASetInputLayout(m_inputLayout);
-	deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
-	deviceContext->PSSetShader(m_pixelShader1, nullptr, 0);
-
-	// Bind our vertex buffer
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-
-	// Update our constant buffer
-	//Triangle::updateRenderData(deviceContext);
-
-	// Draw
-	deviceContext->Draw(6, 0);
-}
 void Triangle::createMesh(Renderer& renderer)
 {
 	// Define our vertices
@@ -182,7 +140,6 @@ void Triangle::createShaders(Renderer& renderer)
 
 	renderer.getDevice()->CreateVertexShader(vsData.data(), vsData.size(), nullptr, &m_vertexShader);
 	renderer.getDevice()->CreatePixelShader(psData.data(), psData.size(), nullptr, &m_pixelShader);
-	renderer.getDevice()->CreatePixelShader(ps1Data.data(), ps1Data.size(), nullptr, &m_pixelShader1);
 
 	// Create input layouts
 	D3D11_INPUT_ELEMENT_DESC layout[] = {
@@ -191,4 +148,25 @@ void Triangle::createShaders(Renderer& renderer)
 	};
 
 	renderer.getDevice()->CreateInputLayout(layout, 2, vsData.data(), vsData.size(), &m_inputLayout);
+}
+
+void Triangle::draw(Renderer& renderer)
+{
+	auto deviceContext = renderer.getDeviceContext();
+
+	// Bind shaders
+	deviceContext->IASetInputLayout(m_inputLayout);
+	deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
+	deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
+
+	// Bind our vertex buffer
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+
+	// Update our constant buffer
+	Triangle::updateRenderData(deviceContext);
+
+	// Draw to screen
+	deviceContext->Draw(6, 0);
 }

@@ -7,7 +7,6 @@ public:
 	Triangle(Renderer& renderer);
 	~Triangle();
 	void draw(Renderer& renderer);
-	void draw2(Renderer& renderer);
 	void updateRenderData(ID3D11DeviceContext* deviceContext);
 
 private:
@@ -22,6 +21,5 @@ private:
 	ID3D11ShaderResourceView* m_constantResourceView = nullptr;
 	ID3D11VertexShader* m_vertexShader = nullptr;
 	ID3D11PixelShader* m_pixelShader = nullptr;
-	ID3D11PixelShader* m_pixelShader1 = nullptr;
 	ID3D11InputLayout* m_inputLayout = nullptr;
 };
