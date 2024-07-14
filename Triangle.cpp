@@ -90,12 +90,8 @@ void Triangle::draw(Renderer& renderer)
 
 	// Draw
 	deviceContext->Draw(6, 0);
-
-	deviceContext->PSSetShader(m_pixelShader1, nullptr, 0);
-
-	Triangle::updateRenderData(deviceContext);
-	//deviceContext->Draw(6, 0);
 }
+
 void Triangle::draw2(Renderer& renderer)
 {
 	auto deviceContext = renderer.getDeviceContext();

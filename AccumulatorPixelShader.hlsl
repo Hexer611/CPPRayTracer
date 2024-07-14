@@ -17,8 +17,13 @@ struct Input
 
 float4 main(Input input) : SV_TARGET
 {
-    float4 oldRender = PrevFrame.Sample(MeshTextureSampler, input.position.xy);
-    float4 newRender = MainTex.Sample(MeshTextureSampler, input.position.xy);
+    float screenWidth = 584.0;
+    float screenHeight = 361.0;
+    float2 samplePosition = float2(input.position.x / screenWidth, input.position.y / screenHeight);
+    float4 oldRender = PrevFrame.Sample(MeshTextureSampler, samplePosition);
+    float4 newRender = MainTex.Sample(MeshTextureSampler, samplePosition);
+    return newRender;
+    return float4(newRender.xy, 0, 0);
 
     float weight = 1.0 / (Frame + 1);
     float4 accumulatedAverage = saturate(oldRender * (1 - weight) + newRender * weight);

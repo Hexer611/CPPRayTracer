@@ -77,12 +77,15 @@ void Renderer::beginFrame1()
 void Renderer::endFrame1()
 {
 	m_swapChain->Present(1, 0);
+}
 
+void Renderer::saveRenderTexture()
+{
 	ID3D11Resource* backResource;
 	m_renderTargetView->GetResource(&backResource);
 	m_deviceContext->CopyResource(renderTextureMain, backResource);
 
-	auto res = D3DX11SaveTextureToFile(m_deviceContext, renderTextureMain, D3DX11_IFF_DDS, "C:/Users/Administrator/Desktop/test/erdem.png");
+	auto res = D3DX11SaveTextureToFile(m_deviceContext, renderTextureMain, D3DX11_IFF_DDS, "C:/Users/Administrator/Desktop/test/erdem.dds");
 
 	backResource->Release();
 }
