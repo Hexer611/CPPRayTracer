@@ -266,11 +266,10 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 // www.pcg-random.org and www.shadertoy.com/view/XlGcRh
 int NextRandom(inout int state)
 {
-	state = state * 747796405 + 2891336453;
-	int result = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
-	result = (result >> 22) ^ result;
-	//int result = state * state;
-	return result;
+    state = state * 747796405 + 2891336453;
+    int result = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
+    result = (result >> 22) ^ result;
+    return result;
 }
 
 float RandomValue(inout int state)
@@ -327,7 +326,7 @@ float3 Trace(Ray ray, inout int rngState)
 	float3 rayColor = 1;
 	//bool hasHit = false;
 	int2 stats = 0;
-	int MaxBounceCount = 1;
+	int MaxBounceCount = 10;
 	
 	for (int i = 0; i <= MaxBounceCount; i++)
 	{
@@ -340,7 +339,7 @@ float3 Trace(Ray ray, inout int rngState)
 			bool isSpecularBounce = material.specularProbability >= RandomValue(rngState);
 			float3 diffuseDir = normalize(hitInfo.normal + RandomDirection(rngState));
 			float3 specularDir = reflect(ray.dir, hitInfo.normal);
-            ray.dir = diffuseDir; //normalize(lerp(diffuseDir, specularDir, material.smoothness * isSpecularBounce));
+            ray.dir = normalize(lerp(diffuseDir, specularDir, material.smoothness * isSpecularBounce));
 
 			float3 emittedLight =  material.emissionColor * material.emissionStrength;
 			incomingLight += emittedLight * rayColor;
@@ -367,7 +366,6 @@ float3 Trace(Ray ray, inout int rngState)
     
 	float boxVis = stats[0] / _boxThreshold;
 	float triVis = stats[1] / _triThreshold;
-	//return float4(stats[0] / 10.0,0,0,1);
 
 	int _testType = 3;
 	switch (_testType)
@@ -461,7 +459,7 @@ float4 main(Input input) : SV_TARGET
 	pixelCoord.y = 1 - pixelCoord.y;
 
     int pixelIndex = _pixelCoord.y * numPixels.x + _pixelCoord.x;
-    int rngState = pixelIndex + Frame * 1000;
+    int rngState = pixelIndex + Frame * screenWidth * screenHeight;
 	
 	float cameraFOV = 60.0;
 	float farPlane = 1000.0;

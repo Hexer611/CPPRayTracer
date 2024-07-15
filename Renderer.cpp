@@ -5,6 +5,7 @@ Renderer::Renderer(Window& window)
 {
 	createDevice(window);
 	createRenderTarget();
+	setRenderTarget();
 }
 
 void Renderer::createDevice(Window& window)
@@ -43,11 +44,11 @@ void Renderer::createRenderTarget()
 	backBuffer->GetDesc(&m_backBufferDesc);
 	backBuffer->Release();
 }
-
-void Renderer::setRenderTarget(ID3D11RenderTargetView* currentTarget)
+ 
+void Renderer::setRenderTarget()
 {
 	// Bind render target
-	m_deviceContext->OMSetRenderTargets(1, &currentTarget, nullptr);
+	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, nullptr);
 
 	// Set viewpot
 	auto viewPort = CD3D11_VIEWPORT(0.f, 0.f, (float)m_backBufferDesc.Width, (float)m_backBufferDesc.Height);
@@ -55,7 +56,7 @@ void Renderer::setRenderTarget(ID3D11RenderTargetView* currentTarget)
 
 	// Set the background color
 	float clearColor[] = { .25f, .5f, 1, 1 };
-	m_deviceContext->ClearRenderTargetView(currentTarget, clearColor);
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 }
 
 void Renderer::Present()

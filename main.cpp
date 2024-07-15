@@ -26,29 +26,13 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	TextureUtils textureUtil(renderer.m_backBufferDesc, renderer.getDevice());
 
 	ID3D11Texture2D* resultTexture;
-	ID3D11RenderTargetView* resultTextureView;
 
-	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
-	textureUtil.rayTracerRenderTexture = resultTexture;
-	textureUtil.rayTracerRenderTextureView = resultTextureView;
-
-	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
-	textureUtil.accumulateRenderTexture = resultTexture;
-	textureUtil.accumulateRenderTextureView = resultTextureView;
-
-
-	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
+	textureUtil.createRenderTextureView(&resultTexture);
 	textureUtil.currentRenderTexture = resultTexture;
-	//textureUtil.rayTracerRenderTextureView = resultTextureView;
 
-	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
+	textureUtil.createRenderTextureView(&resultTexture);
 	textureUtil.prevRenderTexture = resultTexture;
-	//textureUtil.rayTracerRenderTextureView = resultTextureView;
 
-	textureUtil.createMainView(renderer.m_backBufferDesc);
-
-	renderer.setRenderTarget(renderer.m_renderTargetView);
-	//renderer.setRenderTarget(textureUtil.rayTracerRenderTextureView);
 	triangle.draw(renderer);
 	renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 
@@ -69,16 +53,11 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		// Main loop
 		// Update
 		// Draw
-		//renderer.setRenderTarget(renderer.m_renderTargetView);
-		//renderer.setRenderTarget(textureUtil.rayTracerRenderTextureView);
 		triangle.draw(renderer);
 		renderer.copyRenderTexture(&textureUtil.currentRenderTexture);
 
-		//renderer.setRenderTarget(textureUtil.accumulateRenderTextureView);
 		accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
 		renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
-		
-		//renderer.setRenderTarget(renderer.m_renderTargetView);
 
 		renderer.Present();
 

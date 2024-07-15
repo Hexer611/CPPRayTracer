@@ -5,7 +5,7 @@
 class Renderer {
 public:
 	Renderer(Window& window);
-	void setRenderTarget(ID3D11RenderTargetView* m_renderTargetView);
+	void setRenderTarget();
 	void Present();
 	void beginFrame2();
 	void endFrame2();
