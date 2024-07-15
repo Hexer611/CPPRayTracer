@@ -4,6 +4,9 @@
 #include "Triangle.h"
 #include "Accumulator.h"
 #include "TextureUtils.h"
+#include <iostream>
+#include <sstream>
+#include <string>
 
 #define MAX_NAME_STRING 256
 #define HInstance() GetModuleHandle(NULL)
@@ -28,7 +31,26 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
 	textureUtil.rayTracerRenderTexture = resultTexture;
 	textureUtil.rayTracerRenderTextureView = resultTextureView;
-	//textureUtil.createRenderTextureView(&textureUtil.accumulateRenderTexture, &textureUtil.accumulateRenderTextureView);
+
+	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
+	textureUtil.accumulateRenderTexture = resultTexture;
+	textureUtil.accumulateRenderTextureView = resultTextureView;
+
+
+	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
+	textureUtil.currentRenderTexture = resultTexture;
+	//textureUtil.rayTracerRenderTextureView = resultTextureView;
+
+	textureUtil.createRenderTextureView(&resultTexture, &resultTextureView);
+	textureUtil.prevRenderTexture = resultTexture;
+	//textureUtil.rayTracerRenderTextureView = resultTextureView;
+
+	textureUtil.createMainView(renderer.m_backBufferDesc);
+
+	renderer.setRenderTarget(renderer.m_renderTargetView);
+	//renderer.setRenderTarget(textureUtil.rayTracerRenderTextureView);
+	triangle.draw(renderer);
+	renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 
 	MSG msg = { 0 };
 	while (true)
@@ -47,13 +69,27 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		// Main loop
 		// Update
 		// Draw
-		renderer.setRenderTarget(textureUtil.accumulateRenderTextureView);
+		//renderer.setRenderTarget(renderer.m_renderTargetView);
+		//renderer.setRenderTarget(textureUtil.rayTracerRenderTextureView);
 		triangle.draw(renderer);
-		//renderer.saveRenderTexture();
+		renderer.copyRenderTexture(&textureUtil.currentRenderTexture);
 
-		//renderer.beginFrame1();
-		//accumulator.draw(renderer);
+		//renderer.setRenderTarget(textureUtil.accumulateRenderTextureView);
+		accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
+		renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
+		
+		//renderer.setRenderTarget(renderer.m_renderTargetView);
+
 		renderer.Present();
+
+		renderer.saveRenderTexture(textureUtil.currentRenderTexture, "C:/Users/Administrator/Desktop/test/rtx.dds");
+
+		std::string outFolder = "C:/Users/Administrator/Desktop/test/";
+		outFolder += "accumulator";
+		outFolder += std::to_string(accumulator.frame);
+		outFolder += ".dds";
+
+		//renderer.saveRenderTexture(textureUtil.prevRenderTexture, outFolder.c_str());
 	}
 
 	return 0;

@@ -42,28 +42,12 @@ void Renderer::createRenderTarget()
 
 	backBuffer->GetDesc(&m_backBufferDesc);
 	backBuffer->Release();
-
-	D3D11_TEXTURE2D_DESC textureDesc;
-	textureDesc.Width = m_backBufferDesc.Width;
-	textureDesc.Height = m_backBufferDesc.Height;
-	textureDesc.Format = m_backBufferDesc.Format;
-
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = 0;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-	textureDesc.SampleDesc.Quality = 0;
-
-	m_device->CreateTexture2D(&textureDesc, nullptr, &renderTextureMain);
 }
 
 void Renderer::setRenderTarget(ID3D11RenderTargetView* currentTarget)
 {
 	// Bind render target
-	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, nullptr);
+	m_deviceContext->OMSetRenderTargets(1, &currentTarget, nullptr);
 
 	// Set viewpot
 	auto viewPort = CD3D11_VIEWPORT(0.f, 0.f, (float)m_backBufferDesc.Width, (float)m_backBufferDesc.Height);
@@ -71,7 +55,7 @@ void Renderer::setRenderTarget(ID3D11RenderTargetView* currentTarget)
 
 	// Set the background color
 	float clearColor[] = { .25f, .5f, 1, 1 };
-	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
+	m_deviceContext->ClearRenderTargetView(currentTarget, clearColor);
 }
 
 void Renderer::Present()
@@ -79,13 +63,34 @@ void Renderer::Present()
 	m_swapChain->Present(1, 0);
 }
 
-void Renderer::saveRenderTexture()
+void Renderer::copyRenderTexture(ID3D11Texture2D** target)
 {
 	ID3D11Resource* backResource;
 	m_renderTargetView->GetResource(&backResource);
-	m_deviceContext->CopyResource(renderTextureMain, backResource);
+	m_deviceContext->CopyResource(*target, backResource);
+}
 
-	auto res = D3DX11SaveTextureToFile(m_deviceContext, renderTextureMain, D3DX11_IFF_DDS, "C:/Users/Administrator/Desktop/test/erdem.dds");
+void Renderer::saveRenderTexture(const char str[])
+{
+	ID3D11Resource* backResource;
+	m_renderTargetView->GetResource(&backResource);
+
+	auto res = D3DX11SaveTextureToFile(m_deviceContext, backResource, D3DX11_IFF_DDS, str);
+
+	backResource->Release();
+}
+
+void Renderer::saveRenderTexture(ID3D11Resource* target, const char str[])
+{
+	auto res = D3DX11SaveTextureToFile(m_deviceContext, target, D3DX11_IFF_DDS, str);
+}
+
+void Renderer::saveRenderTexture(ID3D11RenderTargetView* target, const char str[])
+{
+	ID3D11Resource* backResource;
+	target->GetResource(&backResource);
+
+	auto res = D3DX11SaveTextureToFile(m_deviceContext, backResource, D3DX11_IFF_DDS, str);
 
 	backResource->Release();
 }

@@ -1,6 +1,13 @@
 Texture2D MainTex : register(t0);
 Texture2D PrevFrame : register(t1);
-int Frame;
+
+cbuffer ErdemBuff : register(b2)
+{
+    int Frame;
+    int NumSpheres;
+    float NumberOfRaysPerPixel;
+    float _1f;
+};
 
 SamplerState MeshTextureSampler
 {
@@ -22,8 +29,8 @@ float4 main(Input input) : SV_TARGET
     float2 samplePosition = float2(input.position.x / screenWidth, input.position.y / screenHeight);
     float4 oldRender = PrevFrame.Sample(MeshTextureSampler, samplePosition);
     float4 newRender = MainTex.Sample(MeshTextureSampler, samplePosition);
-    return newRender;
-    return float4(newRender.xy, 0, 0);
+    //return newRender;
+    //return float4(newRender.xy, 0, 0);
 
     float weight = 1.0 / (Frame + 1);
     float4 accumulatedAverage = saturate(oldRender * (1 - weight) + newRender * weight);

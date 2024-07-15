@@ -6,6 +6,7 @@
 Accumulator::Accumulator(Renderer& renderer)
 {
 	createShaders(renderer);
+	createMidTextures(renderer);
 }
 
 Accumulator::~Accumulator()
@@ -36,18 +37,11 @@ void Accumulator::createShaders(Renderer& renderer)
 	renderer.getDevice()->CreateInputLayout(layout, 2, vsData.data(), vsData.size(), &m_inputLayout);
 }
 
-void Accumulator::draw(Renderer& renderer)
+void Accumulator::createMidTextures(Renderer& renderer)
 {
 	auto deviceContext = renderer.getDeviceContext();
 
-	deviceContext->IASetInputLayout(m_inputLayout);
-
-	// Bind shaders
-	deviceContext->IASetInputLayout(m_inputLayout);
-	deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
-	deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
-
-	ID3D11ShaderResourceView *shaderResource;
+	// TODO: Use texture utils here
 	ID3D11Texture2D* shTexture;
 
 	D3D11_TEXTURE2D_DESC textureDesc;
@@ -64,22 +58,39 @@ void Accumulator::draw(Renderer& renderer)
 	textureDesc.MiscFlags = 0;
 	textureDesc.SampleDesc.Quality = 0;
 
-	std::vector<UINT32> redData(textureDesc.Width * textureDesc.Height, 0xFF00F0F0);
+	std::vector<UINT32> redData(textureDesc.Width * textureDesc.Height, 0xFF0000F0);
 	D3D11_SUBRESOURCE_DATA initData = {};
 	initData.pSysMem = redData.data();
 	initData.SysMemPitch = textureDesc.Width * sizeof(UINT32); // Pitch of the texture
 
-	renderer.getDevice()->CreateTexture2D(&textureDesc, &initData, &shTexture);
+	renderer.getDevice()->CreateTexture2D(&textureDesc, &initData, &previousCopyTexture);
+	renderer.getDevice()->CreateTexture2D(&textureDesc, &initData, &currentCopyTexture);
 
-	deviceContext->CopyResource(shTexture, renderer.renderTextureMain);
+	/*
+	*/
+}
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = textureDesc.Format;
-	srvDesc.Texture2D.MipLevels = 1;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D11Texture2D* currentFrame)
+{
+	auto deviceContext = renderer.getDeviceContext();
 
-	auto res = renderer.getDevice()->CreateShaderResourceView(shTexture, nullptr, &shaderResource);
-	deviceContext->PSSetShaderResources(0, 1, &shaderResource);
+	deviceContext->IASetInputLayout(m_inputLayout);
+
+	// Bind shaders
+	deviceContext->IASetInputLayout(m_inputLayout);
+	deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
+	deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
+
+	deviceContext->CopyResource(previousCopyTexture, previousFrame);
+	deviceContext->CopyResource(currentCopyTexture, currentFrame);
+
+	ID3D11ShaderResourceView* shaderResource1;
+	auto res = renderer.getDevice()->CreateShaderResourceView(currentCopyTexture, nullptr, &shaderResource1);
+	deviceContext->PSSetShaderResources(0, 1, &shaderResource1);
+
+	ID3D11ShaderResourceView* shaderResource;
+	auto res1 = renderer.getDevice()->CreateShaderResourceView(previousCopyTexture, nullptr, &shaderResource);
+	deviceContext->PSSetShaderResources(1, 1, &shaderResource);
 
 	ID3D11Buffer* m_vertexBuffer = nullptr;
 	Vertex vertices[] = {
@@ -106,6 +117,32 @@ void Accumulator::draw(Renderer& renderer)
 
 	// Update our constant buffer
 	//Triangle::updateRenderData(deviceContext);
+
+	ID3D11Buffer* m_constantBuffer = NULL;
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(RenderData);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	renderer.getDevice()->CreateBuffer(&cbDesc, nullptr, &m_constantBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE resource;
+	ZeroMemory(&resource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+
+	RenderData constBuffData;
+	constBuffData.frame = frame;
+	constBuffData.NumberOfRaysPerPixel = 10.0;
+	constBuffData.NumberOfSpheres = 3;
+	frame += 1;
+
+	memcpy(resource.pData, &constBuffData, sizeof(RenderData));
+	deviceContext->Unmap(m_constantBuffer, 0);
+
+	deviceContext->PSSetConstantBuffers(2, 1, &m_constantBuffer);
 
 	// Draw
 	deviceContext->Draw(6, 0);

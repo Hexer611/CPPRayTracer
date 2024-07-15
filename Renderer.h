@@ -9,7 +9,10 @@ public:
 	void Present();
 	void beginFrame2();
 	void endFrame2();
-	void saveRenderTexture();
+	void copyRenderTexture(ID3D11Texture2D** target);
+	void saveRenderTexture(const char a[]);
+	void saveRenderTexture(ID3D11Resource* target, const char a[]);
+	void saveRenderTexture(ID3D11RenderTargetView* target, const char a[]);
 	ID3D11Device* getDevice();
 	ID3D11DeviceContext* getDeviceContext();
 
