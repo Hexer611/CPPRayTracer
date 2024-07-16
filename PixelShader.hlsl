@@ -1,6 +1,5 @@
 float3 ViewParams;
 float4x4 CamLocalToWorldMatrix;
-int NumMeshes;
 int NumTriangles;
 int MaxBounceCount = 1;
 
@@ -21,8 +20,8 @@ cbuffer ErdemBuff : register(b0)
 {
     int Frame;
     int NumSpheres;
+    int NumMeshes;
     float NumberOfRaysPerPixel;
-    float _1f;
 };
 
 struct appdata
@@ -71,10 +70,10 @@ struct BVHBoundingBox
 
 struct BVHNode
 {
-	BVHBoundingBox Bounds;
 	int childIndex;
 	int triangleIndex;
-	int triangleCount;
+    int triangleCount;
+    BVHBoundingBox Bounds;
 };
 
 struct MeshInfo
@@ -105,9 +104,9 @@ cbuffer Buffer1 : register(b1)
     Sphere Spheres[4];
 };
 
-Triangle Triangles[1];
-MeshInfo Meshes[1];
-BVHNode Nodes[1];
+StructuredBuffer<BVHNode> Nodes : register(t2);
+StructuredBuffer<Triangle> Triangles : register(t3);
+StructuredBuffer<MeshInfo> Meshes : register(t4);
 
 float NoBoundsHit(Ray ray, float3 boxMin, float3 boxMax)
 {
@@ -235,6 +234,7 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 	
 	for (int i = 0; i < NumSpheres; i++)
 	{
+        break;
 		Sphere sphere = Spheres[i];
 		HitInfo hitInfo = RaySphere(ray, sphere.position, sphere.radius);
 
@@ -246,18 +246,18 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 		}
 	}
 
-	for (int i = 0; i < NumMeshes; i++)
+	for (int j = 0; j < NumMeshes; j++)
 	{
-		MeshInfo meshInfo = Meshes[i];
+		MeshInfo meshInfo = Meshes[j];
 		BVHNode firstNode = Nodes[meshInfo.nodesStartIndex];
 
-		HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, ray, stats);
+        HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, ray, stats);
 		if (hitInfo.didHit && hitInfo.dst < closestHit.dst)
 		{
 			closestHit = hitInfo;
 			closestHit.material = meshInfo.material;
 		}
-	}
+    }
 
 	return closestHit;
 }
@@ -331,7 +331,7 @@ float3 Trace(Ray ray, inout int rngState)
 	for (int i = 0; i <= MaxBounceCount; i++)
 	{
 		HitInfo hitInfo = CalculateRayCollision(ray, stats);
-		
+        return hitInfo.didHit;
 		if (hitInfo.didHit)
 		{
 			ray.origin = hitInfo.hitPoint;

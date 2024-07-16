@@ -2,13 +2,13 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include "BHVDataTypes.h"
 
 Triangle::Triangle(Renderer& renderer)
 {
+	createData();
 	createMesh(renderer);
 	createShaders(renderer);
-	auto _renderData = RenderData();
-	m_renderData = &_renderData;
 }
 
 Triangle::~Triangle()
@@ -19,21 +19,21 @@ Triangle::~Triangle()
 	m_inputLayout->Release();
 }
 
-void Triangle::updateRenderData(ID3D11DeviceContext* deviceContext)
+void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 {
 	// Constant render sphere buffer
 	RenderData1 SphereData;
 	SphereData.spheres[0] = {};
 	SphereData.spheres[1] = {};
 	SphereData.spheres[2] = {};
-	
-	SphereData.spheres[0].position = float3(-2,-2,10);
+
+	SphereData.spheres[0].position = float3(-2, -2, 10);
 	SphereData.spheres[0].radius = 1;
 	SphereData.spheres[0].material.color = float4(1, 1, 1, 1);
-	SphereData.spheres[0].material.emissionColor = float4(0,0,1,1);
+	SphereData.spheres[0].material.emissionColor = float4(0, 0, 1, 1);
 	SphereData.spheres[0].material.emissionStrength = 5;
 
-	SphereData.spheres[1].position = float3(2,-2,10);
+	SphereData.spheres[1].position = float3(2, -2, 10);
 	SphereData.spheres[1].radius = 1;
 	SphereData.spheres[1].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[1].material.smoothness = 1;
@@ -43,16 +43,16 @@ void Triangle::updateRenderData(ID3D11DeviceContext* deviceContext)
 	SphereData.spheres[2].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[2].material.emissionColor = float4(0, 1, 0, 1);
 	SphereData.spheres[2].material.emissionStrength = 5;
-	
+
 	D3D11_MAPPED_SUBRESOURCE sphereResource;
 	ZeroMemory(&sphereResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	deviceContext->Map(m_constantSphereBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &sphereResource);
 
 	memcpy(sphereResource.pData, &SphereData, sizeof(SphereData));
-	deviceContext->Unmap(m_constantBuffer, 0);
+	deviceContext->Unmap(m_constantSphereBuffer, 0);
 
 	deviceContext->PSSetConstantBuffers(1, 1, &m_constantSphereBuffer);
-	
+
 	// Constant render buffer
 	D3D11_MAPPED_SUBRESOURCE resource;
 	ZeroMemory(&resource, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -62,12 +62,61 @@ void Triangle::updateRenderData(ID3D11DeviceContext* deviceContext)
 	constBuffData.frame = frame;
 	constBuffData.NumberOfRaysPerPixel = 10.0;
 	constBuffData.NumberOfSpheres = 3;
+	constBuffData.NumMeshes = MeshInfos.size();
 	frame += 1;
 
 	memcpy(resource.pData, &constBuffData, sizeof(RenderData));
 	deviceContext->Unmap(m_constantBuffer, 0);
 
 	deviceContext->PSSetConstantBuffers(0, 1, &m_constantBuffer);
+}
+
+void Triangle::addTriangles(ID3D11DeviceContext* deviceContext)
+{
+	// As soon as the resource view is created with buffer x, if we update buffer x we update the resource view
+	deviceContext->PSSetShaderResources(2, 1, &m_nodeResourceView);
+	deviceContext->PSSetShaderResources(3, 1, &m_triangleResourceView);
+	deviceContext->PSSetShaderResources(4, 1, &m_meshResourceView);
+}
+
+void Triangle::createData()
+{
+	BVHNode node1 = {};
+	node1.childIndex = 0;
+	node1.triangleCount = 2;
+	node1.triangleIndex = 0;
+	node1.Bounds.Min = float3(-10, -10, -10);
+	node1.Bounds.Max = float3(10, 10, 10);
+
+	BVHTriangle trig1 = {};
+	trig1.posA = float3(-10, 0, -10);
+	trig1.posB = float3(-10, 2, 10);
+	trig1.posC = float3(10, 0, -10);
+	trig1.normalA = float3(0, 1, 0);
+	trig1.normalB = float3(0, 1, 0);
+	trig1.normalC = float3(0, 1, 0);
+
+	BVHTriangle trig2 = {};
+	trig2.posA = float3(10, 0, -10);
+	trig2.posB = float3(10, 2, 10);
+	trig2.posC = float3(-10, 2, 10);
+	trig2.normalA = float3(0, 1, 0);
+	trig2.normalB = float3(0, 1, 0);
+	trig2.normalC = float3(0, 1, 0);
+
+	MeshInfo mesh = {};
+	mesh.firstTriangleIndex = 0;
+	mesh.numTriangles = 2;
+	mesh.nodesStartIndex = 0;
+	mesh.boundsMin = node1.Bounds.Min;
+	mesh.boundsMax = node1.Bounds.Max;
+	mesh.material.color = float4(1, 0, 0, 1);
+	mesh.material.smoothness = 0;
+
+	Nodes.push_back(node1);
+	Triangles.push_back(trig1);
+	Triangles.push_back(trig2);
+	MeshInfos.push_back(mesh);
 }
 
 void Triangle::createMesh(Renderer& renderer)
@@ -125,6 +174,61 @@ void Triangle::createMesh(Renderer& renderer)
 	sphereDataDesc.StructureByteStride = 0;
 
 	renderer.getDevice()->CreateBuffer(&sphereDataDesc, &sphereSubData, &m_constantSphereBuffer);
+
+	D3D11_BUFFER_DESC nodeDesc = {};
+	// Default takes initial value dynamic doesn't, dynamic needs to be set with map/unmap and stuff
+	nodeDesc.Usage = D3D11_USAGE_DEFAULT;
+	nodeDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	nodeDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	nodeDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	nodeDesc.ByteWidth = sizeof(BVHNode) * Nodes.size(); // Total bytes
+	nodeDesc.StructureByteStride = sizeof(BVHNode); // Size of one object
+
+	D3D11_BUFFER_DESC triangleDesc = {};
+	triangleDesc.Usage = D3D11_USAGE_DEFAULT;
+	triangleDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	triangleDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	triangleDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	triangleDesc.ByteWidth = sizeof(BVHTriangle) * Triangles.size(); // Total bytes
+	triangleDesc.StructureByteStride = sizeof(BVHTriangle); // Size of one object
+
+	D3D11_BUFFER_DESC meshDesc = {};
+	meshDesc.Usage = D3D11_USAGE_DEFAULT;
+	meshDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	meshDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	meshDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	meshDesc.ByteWidth = sizeof(MeshInfo) * MeshInfos.size(); // Total bytes
+	meshDesc.StructureByteStride = sizeof(MeshInfo); // Size of one object
+
+	D3D11_SUBRESOURCE_DATA nodesSubData = {};
+	nodesSubData.pSysMem = Nodes.data();
+	nodesSubData.SysMemPitch = 0;
+	nodesSubData.SysMemSlicePitch = 0;
+
+	D3D11_SUBRESOURCE_DATA trigsSubData = {};
+	trigsSubData.pSysMem = Triangles.data();
+	trigsSubData.SysMemPitch = 0;
+	trigsSubData.SysMemSlicePitch = 0;
+
+	D3D11_SUBRESOURCE_DATA meshesSubData = {};
+	meshesSubData.pSysMem = MeshInfos.data();
+	meshesSubData.SysMemPitch = 0;
+	meshesSubData.SysMemSlicePitch = 0;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured buffers use UNKNOWN format
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.ElementWidth = 1;
+
+	renderer.getDevice()->CreateBuffer(&nodeDesc, &nodesSubData, &m_nodeBuffer);
+	renderer.getDevice()->CreateShaderResourceView(m_nodeBuffer, &srvDesc, &m_nodeResourceView);
+
+	renderer.getDevice()->CreateBuffer(&triangleDesc, &trigsSubData, &m_triangleBuffer);
+	renderer.getDevice()->CreateShaderResourceView(m_triangleBuffer, &srvDesc, &m_triangleResourceView);
+
+	renderer.getDevice()->CreateBuffer(&meshDesc, &meshesSubData, &m_meshBuffer);
+	renderer.getDevice()->CreateShaderResourceView(m_meshBuffer, &srvDesc, &m_meshResourceView);
 }
 
 void Triangle::createShaders(Renderer& renderer)
@@ -165,7 +269,8 @@ void Triangle::draw(Renderer& renderer)
 	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
 
 	// Update our constant buffer
-	Triangle::updateRenderData(deviceContext);
+	Triangle::addSpheres(deviceContext);
+	Triangle::addTriangles(deviceContext);
 
 	// Draw to screen
 	deviceContext->Draw(6, 0);

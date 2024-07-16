@@ -3,8 +3,8 @@
 struct RenderData {
 	int frame;
 	int NumberOfSpheres;
+	int NumMeshes;
 	float NumberOfRaysPerPixel;
-	float _f;
 };
 
 struct Vertex {

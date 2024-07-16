@@ -1,0 +1,12 @@
+BVHNode nodes[1];
+
+nodes[0].childIndex = 11;
+nodes[0].Bounds.Min = float3(1, 1, 1);
+nodes[0].Bounds.Max = float3(1, 1, 1);
+nodes[0].triangleCount = 11;
+nodes[0].triangleIndex = 11;
+
+D3D11_MAPPED_SUBRESOURCE mappedResource;
+deviceContext->Map(m_nodeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+memcpy(mappedResource.pData, nodes, sizeof(nodes));
+deviceContext->Unmap(m_nodeBuffer, 0);
