@@ -3,10 +3,11 @@
 #include <vector>
 #include <iostream>
 #include "BHVDataTypes.h"
+#include "ObjReader.h"
 
-Triangle::Triangle(Renderer& renderer)
+Triangle::Triangle(Renderer& renderer, ObjReader& reader)
 {
-	createData();
+	createData(reader);
 	createMesh(renderer);
 	createShaders(renderer);
 }
@@ -27,11 +28,11 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	SphereData.spheres[1] = {};
 	SphereData.spheres[2] = {};
 
-	SphereData.spheres[0].position = float3(-2, -2, 10);
+	SphereData.spheres[0].position = float3(-2, -2, 1);
 	SphereData.spheres[0].radius = 1;
 	SphereData.spheres[0].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[0].material.emissionColor = float4(0, 0, 1, 1);
-	SphereData.spheres[0].material.emissionStrength = 5;
+	SphereData.spheres[0].material.emissionStrength = 50;
 
 	SphereData.spheres[1].position = float3(2, -2, 10);
 	SphereData.spheres[1].radius = 1;
@@ -60,7 +61,7 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 
 	RenderData constBuffData;
 	constBuffData.frame = frame;
-	constBuffData.NumberOfRaysPerPixel = 10.0;
+	constBuffData.NumberOfRaysPerPixel = 1.0;
 	constBuffData.NumberOfSpheres = 3;
 	constBuffData.NumMeshes = MeshInfos.size();
 	frame += 1;
@@ -79,43 +80,26 @@ void Triangle::addTriangles(ID3D11DeviceContext* deviceContext)
 	deviceContext->PSSetShaderResources(4, 1, &m_meshResourceView);
 }
 
-void Triangle::createData()
+void Triangle::createData(ObjReader& reader)
 {
 	BVHNode node1 = {};
 	node1.childIndex = 0;
-	node1.triangleCount = 2;
+	node1.triangleCount = reader.TriangleData.size();
 	node1.triangleIndex = 0;
 	node1.Bounds.Min = float3(-10, -10, -10);
 	node1.Bounds.Max = float3(10, 10, 10);
 
-	BVHTriangle trig1 = {};
-	trig1.posA = float3(-10, 0, -10);
-	trig1.posB = float3(-10, 2, 10);
-	trig1.posC = float3(10, 0, -10);
-	trig1.normalA = float3(0, 1, 0);
-	trig1.normalB = float3(0, 1, 0);
-	trig1.normalC = float3(0, 1, 0);
-
-	BVHTriangle trig2 = {};
-	trig2.posA = float3(10, 0, -10);
-	trig2.posB = float3(10, 2, 10);
-	trig2.posC = float3(-10, 2, 10);
-	trig2.normalA = float3(0, 1, 0);
-	trig2.normalB = float3(0, 1, 0);
-	trig2.normalC = float3(0, 1, 0);
-
 	MeshInfo mesh = {};
 	mesh.firstTriangleIndex = 0;
-	mesh.numTriangles = 2;
+	mesh.numTriangles = reader.TriangleData.size();
 	mesh.nodesStartIndex = 0;
 	mesh.boundsMin = node1.Bounds.Min;
 	mesh.boundsMax = node1.Bounds.Max;
-	mesh.material.color = float4(1, 0, 0, 1);
-	mesh.material.smoothness = 0;
+	mesh.material.color = float4(1, 1, 1, 1);
+	mesh.material.smoothness = 1;
 
 	Nodes.push_back(node1);
-	Triangles.push_back(trig1);
-	Triangles.push_back(trig2);
+	Triangles = reader.TriangleData;
 	MeshInfos.push_back(mesh);
 }
 
@@ -141,7 +125,7 @@ void Triangle::createMesh(Renderer& renderer)
 
 	RenderData constBuffData;
 	constBuffData.frame = 0.0;
-	constBuffData.NumberOfRaysPerPixel = 10.0;
+	constBuffData.NumberOfRaysPerPixel = 1.0;
 
 	D3D11_SUBRESOURCE_DATA InitData;
 	InitData.pSysMem = &constBuffData;
@@ -184,6 +168,20 @@ void Triangle::createMesh(Renderer& renderer)
 	nodeDesc.ByteWidth = sizeof(BVHNode) * Nodes.size(); // Total bytes
 	nodeDesc.StructureByteStride = sizeof(BVHNode); // Size of one object
 
+	D3D11_SUBRESOURCE_DATA nodesSubData = {};
+	nodesSubData.pSysMem = Nodes.data();
+	nodesSubData.SysMemPitch = 0;
+	nodesSubData.SysMemSlicePitch = 0;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC nodesViewDesc = {};
+	nodesViewDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured buffers use UNKNOWN format
+	nodesViewDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	nodesViewDesc.Buffer.FirstElement = 0;
+	nodesViewDesc.Buffer.ElementWidth = MeshInfos.size();
+
+	renderer.getDevice()->CreateBuffer(&nodeDesc, &nodesSubData, &m_nodeBuffer);
+	renderer.getDevice()->CreateShaderResourceView(m_nodeBuffer, &nodesViewDesc, &m_nodeResourceView);
+
 	D3D11_BUFFER_DESC triangleDesc = {};
 	triangleDesc.Usage = D3D11_USAGE_DEFAULT;
 	triangleDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -191,6 +189,20 @@ void Triangle::createMesh(Renderer& renderer)
 	triangleDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	triangleDesc.ByteWidth = sizeof(BVHTriangle) * Triangles.size(); // Total bytes
 	triangleDesc.StructureByteStride = sizeof(BVHTriangle); // Size of one object
+
+	D3D11_SUBRESOURCE_DATA trigsSubData = {};
+	trigsSubData.pSysMem = Triangles.data();
+	trigsSubData.SysMemPitch = 0;
+	trigsSubData.SysMemSlicePitch = 0;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC trigsViewDesc = {};
+	trigsViewDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured buffers use UNKNOWN format
+	trigsViewDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	trigsViewDesc.Buffer.FirstElement = 0;
+	trigsViewDesc.Buffer.ElementWidth = Triangles.size();
+
+	renderer.getDevice()->CreateBuffer(&triangleDesc, &trigsSubData, &m_triangleBuffer);
+	renderer.getDevice()->CreateShaderResourceView(m_triangleBuffer, &trigsViewDesc, &m_triangleResourceView);
 
 	D3D11_BUFFER_DESC meshDesc = {};
 	meshDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -200,35 +212,19 @@ void Triangle::createMesh(Renderer& renderer)
 	meshDesc.ByteWidth = sizeof(MeshInfo) * MeshInfos.size(); // Total bytes
 	meshDesc.StructureByteStride = sizeof(MeshInfo); // Size of one object
 
-	D3D11_SUBRESOURCE_DATA nodesSubData = {};
-	nodesSubData.pSysMem = Nodes.data();
-	nodesSubData.SysMemPitch = 0;
-	nodesSubData.SysMemSlicePitch = 0;
-
-	D3D11_SUBRESOURCE_DATA trigsSubData = {};
-	trigsSubData.pSysMem = Triangles.data();
-	trigsSubData.SysMemPitch = 0;
-	trigsSubData.SysMemSlicePitch = 0;
-
 	D3D11_SUBRESOURCE_DATA meshesSubData = {};
 	meshesSubData.pSysMem = MeshInfos.data();
 	meshesSubData.SysMemPitch = 0;
 	meshesSubData.SysMemSlicePitch = 0;
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured buffers use UNKNOWN format
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-	srvDesc.Buffer.FirstElement = 0;
-	srvDesc.Buffer.ElementWidth = 1;
-
-	renderer.getDevice()->CreateBuffer(&nodeDesc, &nodesSubData, &m_nodeBuffer);
-	renderer.getDevice()->CreateShaderResourceView(m_nodeBuffer, &srvDesc, &m_nodeResourceView);
-
-	renderer.getDevice()->CreateBuffer(&triangleDesc, &trigsSubData, &m_triangleBuffer);
-	renderer.getDevice()->CreateShaderResourceView(m_triangleBuffer, &srvDesc, &m_triangleResourceView);
+	D3D11_SHADER_RESOURCE_VIEW_DESC meshesViewDesc = {};
+	meshesViewDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured buffers use UNKNOWN format
+	meshesViewDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	meshesViewDesc.Buffer.FirstElement = 0;
+	meshesViewDesc.Buffer.ElementWidth = MeshInfos.size();
 
 	renderer.getDevice()->CreateBuffer(&meshDesc, &meshesSubData, &m_meshBuffer);
-	renderer.getDevice()->CreateShaderResourceView(m_meshBuffer, &srvDesc, &m_meshResourceView);
+	renderer.getDevice()->CreateShaderResourceView(m_meshBuffer, &meshesViewDesc, &m_meshResourceView);
 }
 
 void Triangle::createShaders(Renderer& renderer)

@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClCompile Include="Accumulator.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ObjReader.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="TextureUtils.cpp" />
     <ClCompile Include="Triangle.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="Accumulator.h" />
     <ClInclude Include="BHVDataTypes.h" />
     <ClInclude Include="DataTypes.h" />
+    <ClInclude Include="ObjReader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="TextureUtils.h" />
     <ClInclude Include="Triangle.h" />

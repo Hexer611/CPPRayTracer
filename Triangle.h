@@ -2,11 +2,12 @@
 #include "Renderer.h"
 #include "DataTypes.h"
 #include "BHVDataTypes.h"
+#include "ObjReader.h"
 #include <vector>
 
 class Triangle {
 public:
-	Triangle(Renderer& renderer);
+	Triangle(Renderer& renderer, ObjReader& reader);
 	~Triangle();
 	void draw(Renderer& renderer);
 	void addSpheres(ID3D11DeviceContext* deviceContext);
@@ -15,7 +16,7 @@ public:
 
 private:
 	float frame = 0;
-	void createData();
+	void createData(ObjReader& reader);
 	void createMesh(Renderer& renderer);
 	void createShaders(Renderer& renderer);
 

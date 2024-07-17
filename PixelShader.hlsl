@@ -85,11 +85,13 @@ struct MeshInfo
 	float3 boundsMax;
 	RayTracingMaterial material;
 };
-			
+
 struct Triangle
 {
 	float3 posA, posB, posC;
-	float3 normalA, normalB, normalC;
+    float3 normalA, normalB, normalC;
+    //float _;
+    //float _1;
 };
 
 struct Sphere
@@ -164,7 +166,7 @@ HitInfo RayTriangle(Ray ray, Triangle tri)
 	float u = dot(edgeAC, dao) * invDet;
 	float v = -dot(edgeAB, dao) * invDet;
 	float w = 1 - u - v;
-				
+
 	// Initialize hit info
 	HitInfo hitInfo;
 	hitInfo.didHit = determinant >= 1E-6 && dst >= 0 && u >= 0 && v >= 0 && w >= 0;
@@ -181,16 +183,16 @@ HitInfo BVHRayCollision(int firstNodeIndex, Ray ray, inout int2 stats)
 	nodeIndexStack[stackIndex++] = firstNodeIndex;
 
 	HitInfo hitInfo;
-	hitInfo.dst = 1.#INF;
-
+    hitInfo.dst = 1.#INF;
+	
 	while (stackIndex > 0)
 	{
-		break;
 		BVHNode curNode = Nodes[nodeIndexStack[--stackIndex]];
-
+        
 		if (curNode.childIndex == firstNodeIndex)
 		{
 			stats[1] += curNode.triangleCount;
+			
 			for (int i = curNode.triangleIndex; i < curNode.triangleIndex + curNode.triangleCount; i++)
 			{
 				Triangle tri = Triangles[i];
@@ -256,7 +258,7 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 		{
 			closestHit = hitInfo;
 			closestHit.material = meshInfo.material;
-		}
+        }
     }
 
 	return closestHit;
@@ -326,12 +328,11 @@ float3 Trace(Ray ray, inout int rngState)
 	float3 rayColor = 1;
 	//bool hasHit = false;
 	int2 stats = 0;
-	int MaxBounceCount = 10;
+	int MaxBounceCount = 1;
 	
 	for (int i = 0; i <= MaxBounceCount; i++)
 	{
 		HitInfo hitInfo = CalculateRayCollision(ray, stats);
-        return hitInfo.didHit;
 		if (hitInfo.didHit)
 		{
 			ray.origin = hitInfo.hitPoint;
@@ -361,13 +362,14 @@ float3 Trace(Ray ray, inout int rngState)
 			else
 				incomingLight += GetEnvironmentBackGround(ray);
 			*/
-		}
+            break;
+        }
     }
     
 	float boxVis = stats[0] / _boxThreshold;
-	float triVis = stats[1] / _triThreshold;
+	float triVis = stats[1] / 40000.;
 
-	int _testType = 3;
+	int _testType = 1;
 	switch (_testType)
 	{
 		case 0:
@@ -469,9 +471,9 @@ float4 main(Input input) : SV_TARGET
 	float tanHalfFov = tan(cameraFOV / 2.0);
     float zRange = farPlane - nearPlane;
 	
-	float translateX = 1;
-	float3 _WorldSpaceCameraPos = float3(translateX,0,0);
-	float4x4 CamLocalToWorldMatrix = CreateLocalToWorldMatrix(float3(1,1,1), float3(0,0,0), _WorldSpaceCameraPos);
+	float translateX = 0;
+	float3 _WorldSpaceCameraPos = float3(1,0,0);
+	float4x4 CamLocalToWorldMatrix = CreateLocalToWorldMatrix(float3(1,1,1), float3(0,-3.14/2.0,0), _WorldSpaceCameraPos);
 
 	float planeHeight = nearPlane * tan(radians(cameraFOV * 0.5f)) * 2;
     float planeWidth = planeHeight * aspectRatio;

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "ObjReader.h"
 
 #define MAX_NAME_STRING 256
 #define HInstance() GetModuleHandle(NULL)
@@ -19,9 +20,12 @@ INT WindowHeight;
 
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 {
+	ObjReader reader;
+	reader.ReadFile("C:/Users/Administrator/Documents/UnityRayTracer/Assets/RayTracer/dragonlow.obj");
+
 	Window window(600, 400);
 	Renderer renderer(window);
-	Triangle triangle(renderer);
+	Triangle triangle(renderer, reader);
 	Accumulator accumulator(renderer);
 	TextureUtils textureUtil(renderer.m_backBufferDesc, renderer.getDevice());
 

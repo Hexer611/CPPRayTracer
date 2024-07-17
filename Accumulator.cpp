@@ -135,7 +135,7 @@ void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D1
 
 	RenderData constBuffData;
 	constBuffData.frame = frame;
-	constBuffData.NumberOfRaysPerPixel = 10.0;
+	constBuffData.NumberOfRaysPerPixel = 1.0;
 	constBuffData.NumberOfSpheres = 3;
 	frame += 1;
 
