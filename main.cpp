@@ -21,7 +21,7 @@ INT WindowHeight;
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 {
 	ObjReader reader;
-	reader.ReadFile("C:/Users/Administrator/Documents/UnityRayTracer/Assets/RayTracer/dragonlow.obj");
+	reader.ReadFile("dragonlow.obj");
 
 	Window window(600, 400);
 	Renderer renderer(window);
@@ -65,7 +65,7 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 
 		renderer.Present();
 
-		renderer.saveRenderTexture(textureUtil.currentRenderTexture, "C:/Users/Administrator/Desktop/test/rtx.dds");
+		//renderer.saveRenderTexture(textureUtil.currentRenderTexture, "C:/Users/Administrator/Desktop/test/rtx.dds");
 
 		std::string outFolder = "C:/Users/Administrator/Desktop/test/";
 		outFolder += "accumulator";

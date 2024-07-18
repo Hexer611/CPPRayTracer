@@ -116,11 +116,10 @@ void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D1
 	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
 
 	// Update our constant buffer
-	//Triangle::updateRenderData(deviceContext);
 
 	ID3D11Buffer* m_constantBuffer = NULL;
 	D3D11_BUFFER_DESC cbDesc;
-	cbDesc.ByteWidth = sizeof(RenderData);
+	cbDesc.ByteWidth = sizeof(AccumulatorData);
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
 	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -133,13 +132,11 @@ void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D1
 	ZeroMemory(&resource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 
-	RenderData constBuffData;
+	AccumulatorData constBuffData;
 	constBuffData.frame = frame;
-	constBuffData.NumberOfRaysPerPixel = 1.0;
-	constBuffData.NumberOfSpheres = 3;
 	frame += 1;
 
-	memcpy(resource.pData, &constBuffData, sizeof(RenderData));
+	memcpy(resource.pData, &constBuffData, sizeof(AccumulatorData));
 	deviceContext->Unmap(m_constantBuffer, 0);
 
 	deviceContext->PSSetConstantBuffers(2, 1, &m_constantBuffer);

@@ -28,18 +28,18 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	SphereData.spheres[1] = {};
 	SphereData.spheres[2] = {};
 
-	SphereData.spheres[0].position = float3(-2, -2, 1);
+	SphereData.spheres[0].position = float3(0, -2, -2);
 	SphereData.spheres[0].radius = 1;
 	SphereData.spheres[0].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[0].material.emissionColor = float4(0, 0, 1, 1);
 	SphereData.spheres[0].material.emissionStrength = 50;
 
-	SphereData.spheres[1].position = float3(2, -2, 10);
+	SphereData.spheres[1].position = float3(0, -2, 2);
 	SphereData.spheres[1].radius = 1;
 	SphereData.spheres[1].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[1].material.smoothness = 1;
 
-	SphereData.spheres[2].position = float3(0, 2, 10);
+	SphereData.spheres[2].position = float3(0, 2, 0);
 	SphereData.spheres[2].radius = 1;
 	SphereData.spheres[2].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[2].material.emissionColor = float4(0, 1, 0, 1);
@@ -61,9 +61,19 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 
 	RenderData constBuffData;
 	constBuffData.frame = frame;
-	constBuffData.NumberOfRaysPerPixel = 1.0;
 	constBuffData.NumberOfSpheres = 3;
 	constBuffData.NumMeshes = MeshInfos.size();
+	constBuffData.NumberOfRaysPerPixel = 1.0;
+
+	constBuffData.SunLightDirection = float4(-1, -1, -1);
+	constBuffData.SkyColorHorizon = float4(1, 0, 0);
+	constBuffData.SkyColorZenith = float4(1, 1, 0);
+	constBuffData.GroundColor = float4(1, 1, 0);
+	constBuffData.SunColor = float4(1, 1, 0);
+	constBuffData.SunFocus = 1;
+	constBuffData.SunIntensity = 1;
+	constBuffData.EnvironmentIntensity = 0;
+
 	frame += 1;
 
 	memcpy(resource.pData, &constBuffData, sizeof(RenderData));

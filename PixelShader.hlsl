@@ -7,14 +7,6 @@ float _boxThreshold;
 float _triThreshold;
 //int _testType;
 
-float3 SunLightDirection;
-float3 SkyColorHorizon;
-float3 SkyColorZenith;
-float3 GroundColor;
-float3 SunColor;
-float SunFocus;
-float SunIntensity;
-float EnvironmentIntensity;
 
 cbuffer ErdemBuff : register(b0)
 {
@@ -22,6 +14,16 @@ cbuffer ErdemBuff : register(b0)
     int NumSpheres;
     int NumMeshes;
     float NumberOfRaysPerPixel;
+	
+    float4 SunLightDirection;
+    float4 SkyColorHorizon;
+    float4 SkyColorZenith;
+    float4 GroundColor;
+    float4 SunColor;
+    float SunFocus;
+    float SunIntensity;
+    float EnvironmentIntensity;
+    float _;
 };
 
 struct appdata
@@ -302,7 +304,7 @@ float3 RandomHemisphereDirection(float3 normal, inout int rngState)
 }
 
 float3 GetEnvironmentLight(Ray ray)
-{
+{	
 	float skyGradientT = pow(smoothstep(0, 0.4, ray.dir.y), 0.35);
 	float3 skyGradient = lerp(SkyColorHorizon, SkyColorZenith, skyGradientT);
 	float sun = pow(max(0, dot(ray.dir, -SunLightDirection)), 2) * SunIntensity;
@@ -369,7 +371,7 @@ float3 Trace(Ray ray, inout int rngState)
 	float boxVis = stats[0] / _boxThreshold;
 	float triVis = stats[1] / 40000.;
 
-	int _testType = 1;
+	int _testType = 3;
 	switch (_testType)
 	{
 		case 0:
