@@ -238,7 +238,6 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 	
 	for (int i = 0; i < NumSpheres; i++)
 	{
-        break;
 		Sphere sphere = Spheres[i];
 		HitInfo hitInfo = RaySphere(ray, sphere.position, sphere.radius);
 
@@ -278,7 +277,7 @@ int NextRandom(inout int state)
 
 float RandomValue(inout int state)
 {
-	return NextRandom(state) / 4294967295.0;
+    return NextRandom(state) / 4294967295.0;
 }
 
 float RandomValueNormalDistribution(inout int state) // inout sets the variable state for outside too
@@ -330,7 +329,7 @@ float3 Trace(Ray ray, inout int rngState)
 	float3 rayColor = 1;
 	//bool hasHit = false;
 	int2 stats = 0;
-	int MaxBounceCount = 1;
+	int MaxBounceCount = 4;
 	
 	for (int i = 0; i <= MaxBounceCount; i++)
 	{
@@ -458,12 +457,12 @@ float4 main(Input input) : SV_TARGET
 	float screenWidth = 584.0;
 	float screenHeight = 361.0;
 	float2 numPixels = float2(screenWidth, screenHeight);
-	int2 _pixelCoord = int2(input.position.x, input.position.y);
+    int2 _pixelCoord = int2(input.position.x, input.position.y);
 	float2 pixelCoord = float2(_pixelCoord.x / numPixels.x, _pixelCoord.y / numPixels.y);
 	pixelCoord.y = 1 - pixelCoord.y;
-
+	
     int pixelIndex = _pixelCoord.y * numPixels.x + _pixelCoord.x;
-    int rngState = pixelIndex + Frame * screenWidth * screenHeight;
+    int rngState = pixelIndex + Frame * 719393;
 	
 	float cameraFOV = 60.0;
 	float farPlane = 1000.0;
@@ -497,5 +496,6 @@ float4 main(Input input) : SV_TARGET
 	}
 
     float3 pixelColor = totalLight / NumberOfRaysPerPixel;
-	return float4( pixelColor.xyz, 1.0);
+    float4 result = float4(pixelColor, 1.0);
+    return result;
 }

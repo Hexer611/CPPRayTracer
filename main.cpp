@@ -21,7 +21,7 @@ INT WindowHeight;
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 {
 	ObjReader reader;
-	reader.ReadFile("dragonlow.obj");
+	reader.ReadFile("dragonlowframed.obj");
 
 	Window window(600, 400);
 	Renderer renderer(window);

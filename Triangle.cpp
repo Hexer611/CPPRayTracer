@@ -39,11 +39,11 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	SphereData.spheres[1].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[1].material.smoothness = 1;
 
-	SphereData.spheres[2].position = float3(0, 2, 0);
+	SphereData.spheres[2].position = float3(0, 1.75, 0);
 	SphereData.spheres[2].radius = 1;
 	SphereData.spheres[2].material.color = float4(1, 1, 1, 1);
-	SphereData.spheres[2].material.emissionColor = float4(0, 1, 0, 1);
-	SphereData.spheres[2].material.emissionStrength = 5;
+	SphereData.spheres[2].material.emissionColor = float4(1, 1, 1, 1);
+	SphereData.spheres[2].material.emissionStrength = 10;
 
 	D3D11_MAPPED_SUBRESOURCE sphereResource;
 	ZeroMemory(&sphereResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -71,7 +71,7 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.GroundColor = float4(1, 1, 0);
 	constBuffData.SunColor = float4(1, 1, 0);
 	constBuffData.SunFocus = 1;
-	constBuffData.SunIntensity = 1;
+	constBuffData.SunIntensity = 0;
 	constBuffData.EnvironmentIntensity = 0;
 
 	frame += 1;
