@@ -22,7 +22,7 @@ void Renderer::createDevice(Window& window)
 	// Create swap chain device and device context
 
 	auto result = D3D11CreateDeviceAndSwapChain(
-		nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
+		nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG,
 		nullptr, 0, D3D11_SDK_VERSION, &swapChainDesc,
 		&m_swapChain, &m_device, nullptr, &m_deviceContext);
 

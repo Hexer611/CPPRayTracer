@@ -8,7 +8,7 @@ float _triThreshold;
 //int _testType;
 
 
-cbuffer ErdemBuff : register(b0)
+cbuffer ConstantBuffer : register(b0)
 {
     int Frame;
     int NumSpheres;
@@ -23,7 +23,12 @@ cbuffer ErdemBuff : register(b0)
     float SunFocus;
     float SunIntensity;
     float EnvironmentIntensity;
-    float _;
+    float _float1;
+
+    int isTestVisualizer;
+    int _bool1;
+    int _bool2;
+    int _bool3;
 };
 
 struct appdata
@@ -329,7 +334,7 @@ float3 Trace(Ray ray, inout int rngState)
 	float3 rayColor = 1;
 	//bool hasHit = false;
 	int2 stats = 0;
-	int MaxBounceCount = 4;
+	int MaxBounceCount = isTestVisualizer == 1 ? 1 : 4;
 	
 	for (int i = 0; i <= MaxBounceCount; i++)
 	{
@@ -341,18 +346,26 @@ float3 Trace(Ray ray, inout int rngState)
 			bool isSpecularBounce = material.specularProbability >= RandomValue(rngState);
 			float3 diffuseDir = normalize(hitInfo.normal + RandomDirection(rngState));
 			float3 specularDir = reflect(ray.dir, hitInfo.normal);
-            ray.dir = normalize(lerp(diffuseDir, specularDir, material.smoothness * isSpecularBounce));
+			if (isTestVisualizer == 1)
+                ray.dir = specularDir;
+			else
+	            ray.dir = normalize(lerp(diffuseDir, specularDir, material.smoothness * isSpecularBounce));
 
 			float3 emittedLight =  material.emissionColor * material.emissionStrength;
 			incomingLight += emittedLight * rayColor;
 
 			rayColor *= lerp(material.color, material.specularColor, isSpecularBounce);
 
-			float p = max(rayColor.r, max(rayColor.g, rayColor.b));
-			if (RandomValue(rngState) >= p) {
-				break;
-			}
-			rayColor *= 1.0f / p;
+            if (isTestVisualizer == 0)
+            {
+                float p = max(rayColor.r, max(rayColor.g, rayColor.b));
+                if (RandomValue(rngState) >= p)
+                {
+                    break;
+                }
+                rayColor *= 1.0f / p;
+            }
+			
 			//hasHit = true;
         }
 		else
@@ -367,10 +380,10 @@ float3 Trace(Ray ray, inout int rngState)
         }
     }
     
-	float boxVis = stats[0] / _boxThreshold;
+	float boxVis = stats[0] / 1.;
 	float triVis = stats[1] / 40000.;
 
-	int _testType = 3;
+	int _testType = isTestVisualizer == 1 ? 0 : 3;
 	switch (_testType)
 	{
 		case 0:
@@ -462,7 +475,7 @@ float4 main(Input input) : SV_TARGET
 	pixelCoord.y = 1 - pixelCoord.y;
 	
     int pixelIndex = _pixelCoord.y * numPixels.x + _pixelCoord.x;
-    int rngState = pixelIndex + Frame * 719393;
+    int rngState = pixelIndex + (isTestVisualizer == 1 ? 0 : Frame * 719393);
 	
 	float cameraFOV = 60.0;
 	float farPlane = 1000.0;
@@ -489,13 +502,14 @@ float4 main(Input input) : SV_TARGET
 	ray.dir = normalize(viewPoint - ray.origin);
 
 	float3 totalLight = 0;
-
-    for (int i = 0; i < NumberOfRaysPerPixel; i++)
+    float rayCount = isTestVisualizer == 0 ? 1 : NumberOfRaysPerPixel;
+	
+    for (int i = 0; i < rayCount; i++)
 	{
 		totalLight += Trace(ray, rngState);
 	}
 
-    float3 pixelColor = totalLight / NumberOfRaysPerPixel;
+    float3 pixelColor = totalLight / rayCount;
     float4 result = float4(pixelColor, 1.0);
     return result;
 }

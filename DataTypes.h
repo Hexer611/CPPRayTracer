@@ -108,7 +108,12 @@ struct RenderData {
 	float SunFocus;
 	float SunIntensity;
 	float EnvironmentIntensity;
-	float _;
+	float _float1;
+
+	int isTestVisualizer;
+	int _bool1;
+	int _bool2;
+	int _bool3;
 };
 
 struct AccumulatorData {

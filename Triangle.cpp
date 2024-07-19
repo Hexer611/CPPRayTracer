@@ -73,8 +73,10 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.SunFocus = 1;
 	constBuffData.SunIntensity = 0;
 	constBuffData.EnvironmentIntensity = 0;
+	constBuffData.isTestVisualizer = isTestVisualizer;
 
-	frame += 1;
+	if (isTestVisualizer == 0)
+		frame += 1;
 
 	memcpy(resource.pData, &constBuffData, sizeof(RenderData));
 	deviceContext->Unmap(m_constantBuffer, 0);

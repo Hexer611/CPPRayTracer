@@ -22,7 +22,7 @@ INT WindowHeight;
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 {
 	ObjReader reader;
-	reader.ReadFile("dragonlowframed.obj");
+	reader.ReadFile("dragonlow.obj");
 
 	Window window(600, 400);
 	Renderer renderer(window);
@@ -40,6 +40,8 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 
 	triangle.draw(renderer);
 	renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
+
+	triangle.isTestVisualizer = 1;
 
 	MSG msg = { 0 };
 	while (true)
@@ -61,8 +63,11 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		triangle.draw(renderer);
 		renderer.copyRenderTexture(&textureUtil.currentRenderTexture);
 
-		accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
-		renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
+		if (triangle.isTestVisualizer == 0)
+		{
+			accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
+			renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
+		}
 
 		renderer.Present();
 
