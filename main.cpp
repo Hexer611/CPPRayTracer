@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include "ObjReader.h"
+#include "BVHCalculator.h"
 
 #define MAX_NAME_STRING 256
 #define HInstance() GetModuleHandle(NULL)

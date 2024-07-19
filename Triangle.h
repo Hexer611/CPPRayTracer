@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer.h"
 #include "DataTypes.h"
-#include "BHVDataTypes.h"
+#include "BVHDataTypes.h"
 #include "ObjReader.h"
 #include <vector>
 

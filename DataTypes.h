@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <stdexcept>
 
 struct float3 {
 	float x;
@@ -32,6 +33,42 @@ struct float3 {
 	float3 operator*(float3 const& other) // Cross product
 	{
 		return float3(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x);
+	}
+
+	float3 operator*(float const& other)
+	{
+		return float3(x * other, y * other, z * other);
+	}
+
+	float3 operator/(float const& other)
+	{
+		return float3(x / other, y / other, z / other);
+	}
+
+	float operator[](int index)
+	{
+		switch (index)
+		{
+			case 0:
+				return x;
+			case 1:
+				return y;
+			case 2:
+				return z;
+			default:
+				throw std::out_of_range("Wrong index");
+				return 0;
+		}
+	}
+
+	static float3 Min(float3 f1, float3 f2)
+	{
+		return float3(std::fminf(f1.x, f2.x), std::fminf(f1.y, f2.y), std::fminf(f1.z, f2.z));
+	}
+
+	static float3 Max(float3 f1, float3 f2)
+	{
+		return float3(std::fmaxf(f1.x, f2.x), std::fmaxf(f1.y, f2.y), std::fmaxf(f1.z, f2.z));
 	}
 };
 

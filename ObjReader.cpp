@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 #include "DataTypes.h"
-#include "BHVDataTypes.h"
+#include "BVHDataTypes.h"
 #include <iostream>
+#include "BVHCalculator.h"
 
 ObjReader::ObjReader()
 {
@@ -79,13 +80,22 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces)
 			}
 		}
 	}
-
-	for (int j = 0; j < trianglesv.size(); j+=3)
+	
+	std::vector<float3> finalnormals = {};
+	for (int j = 0; j < trianglesv.size(); j += 3)
 	{
+		trianglesv[j] = trianglesv[j] - 1;
+		trianglesv[j+1] = trianglesv[j+1] - 1;
+		trianglesv[j+2] = trianglesv[j+2] - 1;
+
 		BVHTriangle newTrig = {};
-		newTrig.posA = vertices[trianglesv[j] - 1];
-		newTrig.posB = vertices[trianglesv[j + 1] - 1];
-		newTrig.posC = vertices[trianglesv[j + 2] - 1];
+		newTrig.posA = vertices[trianglesv[j]];
+		newTrig.posB = vertices[trianglesv[j + 1]];
+		newTrig.posC = vertices[trianglesv[j + 2]];
+
+		float3 normal1;
+		float3 normal2;
+		float3 normal3;
 
 		if (flattenFaces)
 		{
@@ -94,17 +104,27 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces)
 			float3 Normal = A * B;
 			Normal = Normal.Normalize();
 
-			newTrig.normalA = Normal;
-			newTrig.normalB = Normal;
-			newTrig.normalC = Normal;
+			normal1 = Normal;
+			normal2 = Normal;
+			normal3 = Normal;
 		}
 		else
 		{
-			newTrig.normalA = normals[trianglesvn[j] - 1];
-			newTrig.normalB = normals[trianglesvn[j + 1] - 1];
-			newTrig.normalC = normals[trianglesvn[j + 2] - 1];
+			normal1 = normals[trianglesvn[j] - 1];
+			normal2 = normals[trianglesvn[j + 1] - 1];
+			normal3 = normals[trianglesvn[j + 2] - 1];
 		}
-		
-		TriangleData.push_back(newTrig);
+
+		finalnormals.push_back(normal1);
+		finalnormals.push_back(normal2);
+		finalnormals.push_back(normal3);
 	}
+	
+	rawObject = RawObject();
+	rawObject.vertices = vertices;
+	rawObject.normals = finalnormals;
+	rawObject.triangles = trianglesv;
+
+	BVHCalculator calculator;
+	bvhObject = calculator.CalculateBVH(rawObject);
 }

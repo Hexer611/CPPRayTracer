@@ -1,5 +1,5 @@
 #pragma once
-#include "BHVDataTypes.h"
+#include "BVHDataTypes.h"
 #include <vector>
 
 class ObjReader {
@@ -9,6 +9,8 @@ public:
 
 	void ReadFile(const char filePath[], bool flattenFaces = false);
 	std::vector<BVHTriangle> TriangleData = {};
+	RawObject rawObject;
+	BVHObject bvhObject;
 private:
 
 };

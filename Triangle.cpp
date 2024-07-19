@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
-#include "BHVDataTypes.h"
+#include "BVHDataTypes.h"
 #include "ObjReader.h"
 
 Triangle::Triangle(Renderer& renderer, ObjReader& reader)

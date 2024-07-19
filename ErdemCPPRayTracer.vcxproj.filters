@@ -36,6 +36,9 @@
     <ClCompile Include="ObjReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BVHCalculator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -56,10 +59,13 @@
     <ClInclude Include="TextureUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BHVDataTypes.h">
+    <ClInclude Include="BVHDataTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ObjReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BVHCalculator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

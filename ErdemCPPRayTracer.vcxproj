@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Accumulator.cpp" />
+    <ClCompile Include="BVHCalculator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ObjReader.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -151,7 +152,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Accumulator.h" />
-    <ClInclude Include="BHVDataTypes.h" />
+    <ClInclude Include="BVHDataTypes.h" />
+    <ClInclude Include="BVHCalculator.h" />
     <ClInclude Include="DataTypes.h" />
     <ClInclude Include="ObjReader.h" />
     <ClInclude Include="Renderer.h" />
