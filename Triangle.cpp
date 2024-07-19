@@ -92,6 +92,11 @@ void Triangle::addTriangles(ID3D11DeviceContext* deviceContext)
 
 void Triangle::createData(ObjReader& reader)
 {
+	Nodes = reader.bvhObject.Nodes;
+	Triangles = reader.bvhObject.Triangles;
+	MeshInfos.push_back(reader.bvhObject.MeshInfo);
+
+	return;
 	BVHNode node1 = {};
 	node1.childIndex = 0;
 	node1.triangleCount = reader.TriangleData.size();
