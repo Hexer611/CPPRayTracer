@@ -41,9 +41,11 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	triangle.draw(renderer);
 	renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 
-	triangle.isTestVisualizer = 1;
+	triangle.isTestVisualizer = 0;
 
 	MSG msg = { 0 };
+	int curFrame = 0;
+	int displayTrheshold = 100;
 	while (true)
 	{
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -55,7 +57,7 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 			{
 				break;
 			}
-		} 
+		}
 
 		// Main loop
 		// Update
@@ -69,15 +71,17 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 			renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 		}
 
-		renderer.Present();
+		curFrame++;
+		if (curFrame % displayTrheshold == 0)
+			renderer.Present();
 
 		//renderer.saveRenderTexture(textureUtil.currentRenderTexture, "C:/Users/Administrator/Desktop/test/rtx.dds");
-
+		/*
 		std::string outFolder = "C:/Users/Administrator/Desktop/test/";
 		outFolder += "accumulator";
 		outFolder += std::to_string(accumulator.frame);
 		outFolder += ".dds";
-
+		*/
 		//renderer.saveRenderTexture(textureUtil.prevRenderTexture, outFolder.c_str());
 	}
 

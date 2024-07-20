@@ -99,25 +99,6 @@ void Triangle::createData(ObjReader& reader)
 	MeshInfos.push_back(reader.bvhObject.MeshInfo);
 
 	return;
-	BVHNode node1 = {};
-	node1.childIndex = 0;
-	node1.triangleCount = reader.TriangleData.size();
-	node1.triangleIndex = 0;
-	node1.Bounds.Min = float3(-10, -10, -10);
-	node1.Bounds.Max = float3(10, 10, 10);
-
-	MeshInfo mesh = {};
-	mesh.firstTriangleIndex = 0;
-	mesh.numTriangles = reader.TriangleData.size();
-	mesh.nodesStartIndex = 0;
-	mesh.boundsMin = node1.Bounds.Min;
-	mesh.boundsMax = node1.Bounds.Max;
-	mesh.material.color = float4(1, 1, 1, 1);
-	mesh.material.smoothness = 1;
-
-	Nodes.push_back(node1);
-	Triangles = reader.TriangleData;
-	MeshInfos.push_back(mesh);
 }
 
 void Triangle::createMesh(Renderer& renderer)
@@ -194,7 +175,7 @@ void Triangle::createMesh(Renderer& renderer)
 	nodesViewDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured buffers use UNKNOWN format
 	nodesViewDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	nodesViewDesc.Buffer.FirstElement = 0;
-	nodesViewDesc.Buffer.ElementWidth = MeshInfos.size();
+	nodesViewDesc.Buffer.ElementWidth = Nodes.size();
 
 	renderer.getDevice()->CreateBuffer(&nodeDesc, &nodesSubData, &m_nodeBuffer);
 	renderer.getDevice()->CreateShaderResourceView(m_nodeBuffer, &nodesViewDesc, &m_nodeResourceView);

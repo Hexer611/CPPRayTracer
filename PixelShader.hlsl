@@ -210,10 +210,10 @@ HitInfo BVHRayCollision(int firstNodeIndex, Ray ray, inout int2 stats)
 					hitInfo = triHitInfo;
 				}
 			}
-		}
+        }
 		else
 		{
-			stats[0]+=2;
+			stats[0] += 2;
 			BVHNode Child1 = Nodes[curNode.childIndex + 0];
 			BVHNode Child2 = Nodes[curNode.childIndex + 1];
 							
@@ -335,12 +335,14 @@ float3 Trace(Ray ray, inout int rngState)
 	//bool hasHit = false;
 	int2 stats = 0;
 	int MaxBounceCount = isTestVisualizer == 1 ? 1 : 4;
+    bool hasHit = false;
 	
 	for (int i = 0; i <= MaxBounceCount; i++)
 	{
 		HitInfo hitInfo = CalculateRayCollision(ray, stats);
 		if (hitInfo.didHit)
 		{
+            hasHit = true;
 			ray.origin = hitInfo.hitPoint;
 			RayTracingMaterial material = hitInfo.material;
 			bool isSpecularBounce = material.specularProbability >= RandomValue(rngState);
@@ -380,10 +382,10 @@ float3 Trace(Ray ray, inout int rngState)
         }
     }
     
-	float boxVis = stats[0] / 1.;
-	float triVis = stats[1] / 40000.;
+	float boxVis = stats[0] / 200.;
+	float triVis = stats[1] / 100.;
 
-	int _testType = isTestVisualizer == 1 ? 0 : 3;
+	int _testType = isTestVisualizer == 1 ? 4 : 3;
 	switch (_testType)
 	{
 		case 0:
@@ -399,11 +401,14 @@ float3 Trace(Ray ray, inout int rngState)
 		case 3:
 			return incomingLight;
 		break;
+        case 4:
+            return hasHit ? 1 : 0;
+		break;
 		default:
 			return 0;
 		break;
 	}
-	return incomingLight;
+    return saturate(incomingLight);
 }
 
 float4x4 CreateLocalToWorldMatrix(float3 scale, float3 rotation, float3 translation)

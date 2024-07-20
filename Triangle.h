@@ -13,7 +13,7 @@ public:
 	void addSpheres(ID3D11DeviceContext* deviceContext);
 	void addTriangles(ID3D11DeviceContext* device);
 	void updateRenderData(ID3D11DeviceContext* deviceContext);
-
+	
 	int isTestVisualizer;
 private:
 	float frame = 0;

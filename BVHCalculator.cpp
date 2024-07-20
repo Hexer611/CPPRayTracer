@@ -5,7 +5,7 @@
 #include <math.h>
 
 int MAXDEPTH = 4;
-std::vector<BVHNode> nodes = {};
+std::vector<BVHNode*> nodes = {};
 std::vector<BVHTriangle> triangles = {};
 
 BVHObject BVHCalculator::CalculateBVH(RawObject rawObject)
@@ -45,7 +45,6 @@ BVHObject BVHCalculator::CalculateBVH(RawObject rawObject)
 	}
 
 	triangles = trigs;
-	newObject.Triangles = trigs;
 
 	BVHNode root = {};
 	root.Bounds = bounds;
@@ -53,23 +52,25 @@ BVHObject BVHCalculator::CalculateBVH(RawObject rawObject)
 	root.triangleIndex = 0;
 	root.triangleCount = trigs.size();
 
-	nodes.push_back(root);
+	nodes.push_back(&root);
 	Split(&root, 0);
+	newObject.Triangles = triangles;
+	
+	for (auto newNode : nodes)
+	{
+		newObject.Nodes.push_back(*newNode);
+	}
 
-	newObject.Nodes = nodes;
 	return newObject;
 }
 
 void BVHCalculator::Split(BVHNode *parentNode, int depth)
 {
-	if (depth > 32)
+	if (depth >= 32)
 		return;
 
-	BVHNode _child1 = {};
-	BVHNode _child2 = {};
-
-	BVHNode *child1 = &_child1;
-	BVHNode *child2 = &_child2;
+	BVHNode *child1 = new BVHNode();
+	BVHNode *child2 = new BVHNode();
 
 	BVHBoundingBox bound1 = {};
 	BVHBoundingBox bound2 = {};
@@ -81,6 +82,8 @@ void BVHCalculator::Split(BVHNode *parentNode, int depth)
 	child2->triangleIndex = parentNode->triangleIndex;
 
 	parentNode->childIndex = nodes.size();
+	nodes.push_back(child1);
+	nodes.push_back(child2);
 
 	auto size = parentNode->Bounds.Max - parentNode->Bounds.Min;
 	int splitAxis = size.x > std::fmaxf(size.y, size.z) ? 0 : size.y > size.z ? 1 : 2;
@@ -104,9 +107,6 @@ void BVHCalculator::Split(BVHNode *parentNode, int depth)
 			child2->triangleIndex++;
 		}
 	}
-
-	nodes.push_back(*child1);
-	nodes.push_back(*child2);
 
 	if (child1->triangleCount > 0 && child2->triangleCount > 0)
 	{

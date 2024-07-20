@@ -60,6 +60,13 @@ struct BVHNode
 	int triangleIndex;
 	int triangleCount;
 	BVHBoundingBox Bounds;
+	BVHNode()
+	{
+		childIndex = 0;
+		triangleIndex = 0;
+		triangleCount = 0;
+		Bounds = {};
+	}
 };
 
 struct BVHObject
