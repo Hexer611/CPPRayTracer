@@ -9,6 +9,7 @@
 #include <string>
 #include "ObjReader.h"
 #include "BVHCalculator.h"
+#include <dwrite.h>
 
 #define MAX_NAME_STRING 256
 #define HInstance() GetModuleHandle(NULL)
@@ -72,8 +73,14 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		}
 
 		curFrame++;
-		if (curFrame % displayTrheshold == 0)
+		wchar_t frameText[256];
+		swprintf_s(frameText, L"%d", curFrame);
+
+		if (curFrame % 100 == 0)
+		{
+			renderer.CreateText(frameText);
 			renderer.Present();
+		}
 
 		//renderer.saveRenderTexture(textureUtil.currentRenderTexture, "C:/Users/Administrator/Desktop/test/rtx.dds");
 		/*

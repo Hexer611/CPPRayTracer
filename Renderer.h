@@ -1,14 +1,16 @@
 #pragma once
 #include "Window.h"
 #include <d3d11.h>
+#include <string>
+#include <memory>
+#include <SpriteFont.h>
 
 class Renderer {
 public:
 	Renderer(Window& window);
 	void setRenderTarget();
 	void Present();
-	void beginFrame2();
-	void endFrame2();
+	void CreateText(const wchar_t* text);
 	void copyRenderTexture(ID3D11Texture2D** target);
 	void saveRenderTexture(const char a[]);
 	void saveRenderTexture(ID3D11Resource* target, const char a[]);
@@ -31,4 +33,8 @@ private:
 	IDXGISwapChain* m_swapChain = nullptr;
 	ID3D11Device* m_device = nullptr;
 	ID3D11DeviceContext* m_deviceContext = nullptr;
+	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+
+	// Text stuff
+	std::unique_ptr<DirectX::SpriteFont> m_font;
 };

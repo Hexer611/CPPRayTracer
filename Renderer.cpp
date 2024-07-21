@@ -1,5 +1,8 @@
 #include "Renderer.h"
 #include "D3DX11tex.h"
+#include <memory>
+#include <SpriteFont.h>
+#include <SimpleMath.h>
 
 Renderer::Renderer(Window& window)
 {
@@ -41,6 +44,9 @@ void Renderer::createRenderTarget()
 	m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**) & backBuffer);
 	m_device->CreateRenderTargetView(backBuffer, nullptr, &m_renderTargetView);
 
+	m_font = std::make_unique<DirectX::SpriteFont>(m_device, L"myfile.spritefont");
+	m_spriteBatch = std::make_unique<DirectX::SpriteBatch>(m_deviceContext);
+
 	backBuffer->GetDesc(&m_backBufferDesc);
 	backBuffer->Release();
 }
@@ -57,6 +63,29 @@ void Renderer::setRenderTarget()
 	// Set the background color
 	float clearColor[] = { .25f, .5f, 1, 1 };
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
+}
+
+void Renderer::CreateText(const wchar_t* text)
+{
+	DirectX::SimpleMath::Vector2 m_fontPos;
+	
+	m_fontPos.x = 100.0;
+	m_fontPos.y = 100.0;
+
+	//m_spriteBatch.reset();
+
+	m_spriteBatch->Begin();
+
+	DirectX::SimpleMath::Vector2 origin = m_font->MeasureString(text);
+	origin.x /= 2;
+	origin.y /= 2;
+
+	m_font->DrawString(m_spriteBatch.get(), text,
+		m_fontPos, DirectX::Colors::White, 0.f, origin);
+
+	m_spriteBatch->End();
+
+	return;
 }
 
 void Renderer::Present()
@@ -94,26 +123,6 @@ void Renderer::saveRenderTexture(ID3D11RenderTargetView* target, const char str[
 	auto res = D3DX11SaveTextureToFile(m_deviceContext, backResource, D3DX11_IFF_DDS, str);
 
 	backResource->Release();
-}
-
-void Renderer::beginFrame2()
-{
-	// Bind render target
-	m_deviceContext->OMSetRenderTargets(1, &m_accumulateTargetView, nullptr);
-
-	// Set viewpot
-	auto viewPort = CD3D11_VIEWPORT(0.f, 0.f, (float)m_backBufferDesc.Width, (float)m_backBufferDesc.Height);
-	m_deviceContext->RSSetViewports(1, &viewPort);
-
-	// Set the background color
-	float clearColor[] = { .25f, .5f, 1, 1 };
-	m_deviceContext->ClearRenderTargetView(m_accumulateTargetView, clearColor);
-}
-
-void Renderer::endFrame2()
-{
-	m_swapChain->Present(1, 0);
-	m_deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 }
 
 ID3D11Device* Renderer::getDevice()
