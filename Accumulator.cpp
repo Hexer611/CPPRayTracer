@@ -69,33 +69,9 @@ void Accumulator::createMidTextures(Renderer& renderer)
 	renderer.getDevice()->CreateTexture2D(&textureDesc, &initData, &previousCopyTexture);
 	renderer.getDevice()->CreateTexture2D(&textureDesc, &initData, &currentCopyTexture);
 
-	/*
-	*/
-}
-
-void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D11Texture2D* currentFrame)
-{
-	auto deviceContext = renderer.getDeviceContext();
-
-	deviceContext->IASetInputLayout(m_inputLayout);
-
-	// Bind shaders
-	deviceContext->IASetInputLayout(m_inputLayout);
-	deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
-	deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
-
-	deviceContext->CopyResource(previousCopyTexture, previousFrame);
-	deviceContext->CopyResource(currentCopyTexture, currentFrame);
-
-	ID3D11ShaderResourceView* shaderResource1;
-	auto res = renderer.getDevice()->CreateShaderResourceView(currentCopyTexture, nullptr, &shaderResource1);
-	deviceContext->PSSetShaderResources(0, 1, &shaderResource1);
-
-	ID3D11ShaderResourceView* shaderResource;
-	auto res1 = renderer.getDevice()->CreateShaderResourceView(previousCopyTexture, nullptr, &shaderResource);
-	deviceContext->PSSetShaderResources(1, 1, &shaderResource);
-
-	ID3D11Buffer* m_vertexBuffer = nullptr;
+	renderer.getDevice()->CreateShaderResourceView(previousCopyTexture, nullptr, &previousCopyTextureResourceView);
+	renderer.getDevice()->CreateShaderResourceView(currentCopyTexture, nullptr, &currentCopyTextureResourceView);
+	
 	Vertex vertices[] = {
 		{-1,-1,1,0,0},
 		{-1,1,0,1,0},
@@ -113,14 +89,6 @@ void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D1
 
 	renderer.getDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 
-	// Bind our vertex buffer
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-
-	// Update our constant buffer
-
-	ID3D11Buffer* m_constantBuffer = NULL;
 	D3D11_BUFFER_DESC cbDesc;
 	cbDesc.ByteWidth = sizeof(AccumulatorData);
 	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -130,6 +98,31 @@ void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D1
 	cbDesc.StructureByteStride = 0;
 
 	renderer.getDevice()->CreateBuffer(&cbDesc, nullptr, &m_constantBuffer);
+}
+
+void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D11Texture2D* currentFrame)
+{
+	auto deviceContext = renderer.getDeviceContext();
+
+	deviceContext->IASetInputLayout(m_inputLayout);
+
+	// Bind shaders
+	deviceContext->IASetInputLayout(m_inputLayout);
+	deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
+	deviceContext->PSSetShader(m_pixelShader, nullptr, 0);
+
+	deviceContext->CopyResource(previousCopyTexture, previousFrame);
+	deviceContext->CopyResource(currentCopyTexture, currentFrame);
+
+	deviceContext->PSSetShaderResources(0, 1, &currentCopyTextureResourceView);
+	deviceContext->PSSetShaderResources(1, 1, &previousCopyTextureResourceView);
+
+	// Bind our vertex buffer
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+
+	// Update our constant buffer
 
 	D3D11_MAPPED_SUBRESOURCE resource;
 	ZeroMemory(&resource, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -148,5 +141,4 @@ void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D1
 
 	// Draw
 	deviceContext->Draw(6, 0);
-	m_vertexBuffer->Release();
 }

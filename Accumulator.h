@@ -21,7 +21,13 @@ private:
 
 	ID3D11InputLayout* m_inputLayout = nullptr;
 
+	ID3D11ShaderResourceView* previousCopyTextureResourceView;
+	ID3D11ShaderResourceView* currentCopyTextureResourceView;
+
 	ID3D11Texture2D* previousCopyTexture;
 	ID3D11Texture2D* currentCopyTexture;
 	ID3D11Texture2D* currentTexture;
+
+	ID3D11Buffer* m_vertexBuffer = nullptr;
+	ID3D11Buffer* m_constantBuffer = nullptr;
 };

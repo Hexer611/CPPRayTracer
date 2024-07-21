@@ -235,11 +235,9 @@ void Triangle::createShaders(Renderer& renderer)
 	// Create shaders
 	std::ifstream vsFile("VertexShader.cso", std::ios::binary);
 	std::ifstream psFile("PixelShader.cso", std::ios::binary);
-	std::ifstream ps1File("PixelShader1.cso", std::ios::binary);
 
 	std::vector<char> vsData = { std::istreambuf_iterator<char>(vsFile), std::istreambuf_iterator<char>() };
 	std::vector<char> psData = { std::istreambuf_iterator<char>(psFile), std::istreambuf_iterator<char>() };
-	std::vector<char> ps1Data = { std::istreambuf_iterator<char>(ps1File), std::istreambuf_iterator<char>() };
 
 	renderer.getDevice()->CreateVertexShader(vsData.data(), vsData.size(), nullptr, &m_vertexShader);
 	renderer.getDevice()->CreatePixelShader(psData.data(), psData.size(), nullptr, &m_pixelShader);
