@@ -25,7 +25,7 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	ObjReader reader;
 	reader.ReadFile("dragonlow.obj");
 
-	Window window(600, 400);
+	Window window(1920, 1080);
 	Renderer renderer(window);
 	Triangle triangle(renderer, reader);
 	Accumulator accumulator(renderer);

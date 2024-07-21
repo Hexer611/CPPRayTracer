@@ -5,6 +5,9 @@
 
 Accumulator::Accumulator(Renderer& renderer)
 {
+	viewPortWidth = renderer.viewPortWidth;
+	viewPortHeight = renderer.viewPortHeight;
+
 	createShaders(renderer);
 	createMidTextures(renderer);
 }
@@ -134,6 +137,8 @@ void Accumulator::draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D1
 
 	AccumulatorData constBuffData;
 	constBuffData.frame = frame;
+	constBuffData.screenWidth = viewPortWidth;
+	constBuffData.screenHeight = viewPortHeight;
 	frame += 1;
 
 	memcpy(resource.pData, &constBuffData, sizeof(AccumulatorData));

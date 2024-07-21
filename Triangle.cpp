@@ -7,6 +7,9 @@
 
 Triangle::Triangle(Renderer& renderer, ObjReader& reader)
 {
+	viewPortWidth = renderer.viewPortWidth;
+	viewPortHeight = renderer.viewPortHeight;
+
 	createData(reader);
 	createMesh(renderer);
 	createShaders(renderer);
@@ -74,6 +77,8 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.SunIntensity = 0;
 	constBuffData.EnvironmentIntensity = 0;
 	constBuffData.isTestVisualizer = isTestVisualizer;
+	constBuffData.screenWidth = viewPortWidth;
+	constBuffData.screenHeight = viewPortHeight;
 
 	if (isTestVisualizer == 0)
 		frame += 1;

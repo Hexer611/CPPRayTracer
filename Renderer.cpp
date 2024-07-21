@@ -49,6 +49,9 @@ void Renderer::createRenderTarget()
 
 	backBuffer->GetDesc(&m_backBufferDesc);
 	backBuffer->Release();
+
+	viewPortWidth = m_backBufferDesc.Width;
+	viewPortHeight = m_backBufferDesc.Height;
 }
  
 void Renderer::setRenderTarget()

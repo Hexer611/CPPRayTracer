@@ -23,7 +23,11 @@ cbuffer ConstantBuffer : register(b0)
     float SunFocus;
     float SunIntensity;
     float EnvironmentIntensity;
+    float screenWidth;
+    float screenHeight;
     float _float1;
+    float _float2;
+    float _float3;
 
     int isTestVisualizer;
     int _bool1;
@@ -382,10 +386,10 @@ float3 Trace(Ray ray, inout int rngState)
         }
     }
     
-	float boxVis = stats[0] / 200.;
+	float boxVis = stats[0] / 500.;
 	float triVis = stats[1] / 100.;
 
-	int _testType = isTestVisualizer == 1 ? 4 : 3;
+	int _testType = isTestVisualizer == 1 ? 1 : 3;
 	switch (_testType)
 	{
 		case 0:
@@ -472,8 +476,6 @@ struct Input {
 
 float4 main(Input input) : SV_TARGET
 {
-	float screenWidth = 584.0;
-	float screenHeight = 361.0;
 	float2 numPixels = float2(screenWidth, screenHeight);
     int2 _pixelCoord = int2(input.position.x, input.position.y);
 	float2 pixelCoord = float2(_pixelCoord.x / numPixels.x, _pixelCoord.y / numPixels.y);

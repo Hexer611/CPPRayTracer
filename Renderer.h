@@ -24,6 +24,10 @@ public:
 	// Render targets
 	ID3D11RenderTargetView* m_accumulateTargetView = nullptr;
 	ID3D11RenderTargetView* m_renderTargetView = nullptr;
+
+	// Viewport
+	int viewPortWidth;
+	int viewPortHeight;
 private:
 
 	void createDevice(Window& window);

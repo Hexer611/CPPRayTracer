@@ -4,8 +4,8 @@ Texture2D PrevFrame : register(t1);
 cbuffer ErdemBuff : register(b2)
 {
     int Frame;
-    int _1;
-    int _2;
+    float screenWidth;
+    float screenHeight;
     int _3;
 };
 
@@ -24,8 +24,6 @@ struct Input
 
 float4 main(Input input) : SV_TARGET
 {
-    float screenWidth = 584.0;
-    float screenHeight = 361.0;
     float2 samplePosition = float2(input.position.x / screenWidth, input.position.y / screenHeight);
     float4 oldRender = PrevFrame.Sample(MeshTextureSampler, samplePosition);
     float4 newRender = MainTex.Sample(MeshTextureSampler, samplePosition);

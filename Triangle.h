@@ -15,6 +15,10 @@ public:
 	void updateRenderData(ID3D11DeviceContext* deviceContext);
 	
 	int isTestVisualizer;
+
+	// Viewport
+	int viewPortWidth;
+	int viewPortHeight;
 private:
 	float frame = 0;
 	void createData(ObjReader& reader);

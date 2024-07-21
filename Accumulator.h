@@ -10,7 +10,10 @@ public:
 	void createShaders(Renderer& renderer);
 	void createMidTextures(Renderer& renderer);
 	void draw(Renderer& renderer, ID3D11Texture2D* previousFrame, ID3D11Texture2D* currentFrame);
+
 	float frame = 0;
+	int viewPortWidth;
+	int viewPortHeight;
 
 private:
 	ID3D11VertexShader* m_vertexShader = nullptr;

@@ -108,7 +108,11 @@ struct RenderData {
 	float SunFocus;
 	float SunIntensity;
 	float EnvironmentIntensity;
+	float screenWidth;
+	float screenHeight;
 	float _float1;
+	float _float2;
+	float _float3;
 
 	int isTestVisualizer;
 	int _bool1;
@@ -118,8 +122,8 @@ struct RenderData {
 
 struct AccumulatorData {
 	int frame;
-	int _1;
-	int _2;
+	float screenWidth;
+	float screenHeight;
 	int _3;
 };
 
