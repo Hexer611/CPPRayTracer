@@ -8,8 +8,12 @@ struct MeshInfo
 	int numTriangles;
 	int firstTriangleIndex;
 	int nodesStartIndex;
+	int _;
 	float3 boundsMin;
 	float3 boundsMax;
+	float _1;
+	float _2;
+	float4x4 modelWorldToLocalMaxtix;
 	RayTracingMaterial material;
 };
 

@@ -6,7 +6,8 @@
 #include "ObjReader.h"
 #include <cstdlib>
 #include <time.h> 
-#include <iostream> 
+#include <iostream>
+#include "VectorUtils.h"
 
 Triangle::Triangle(Renderer& renderer, ObjReader& reader)
 {
@@ -33,15 +34,15 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	SphereData.spheres[0] = {};
 	SphereData.spheres[1] = {};
 	SphereData.spheres[2] = {};
-
+	/*
 	SphereData.spheres[0].position = float3(0, -2, -2);
-	SphereData.spheres[0].radius = 1;
+	SphereData.spheres[0].radius = 2;
 	SphereData.spheres[0].material.color = float4(1, 1, 1, 1);
-	SphereData.spheres[0].material.emissionColor = float4(0, 0, 1, 1);
-	SphereData.spheres[0].material.emissionStrength = 50;
-
+	SphereData.spheres[0].material.emissionColor = float4(0, 1, 0, 1);
+	SphereData.spheres[0].material.emissionStrength = 3;
+	
 	SphereData.spheres[1].position = float3(0, -2, 2);
-	SphereData.spheres[1].radius = 1;
+	SphereData.spheres[1].radius = 2;
 	SphereData.spheres[1].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[1].material.smoothness = 1;
 
@@ -49,8 +50,8 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	SphereData.spheres[2].radius = 1;
 	SphereData.spheres[2].material.color = float4(1, 1, 1, 1);
 	SphereData.spheres[2].material.emissionColor = float4(1, 1, 1, 1);
-	SphereData.spheres[2].material.emissionStrength = 10;
-
+	SphereData.spheres[2].material.emissionStrength = 1;
+	*/
 	D3D11_MAPPED_SUBRESOURCE sphereResource;
 	ZeroMemory(&sphereResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	deviceContext->Map(m_constantSphereBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &sphereResource);
@@ -66,18 +67,18 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	deviceContext->Map(m_constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 
 	RenderData constBuffData;
-	constBuffData.frame = frame;
+	constBuffData.frame = rand() / 32767.0;
 	constBuffData.NumberOfSpheres = 3;
 	constBuffData.NumMeshes = MeshInfos.size();
-	constBuffData.NumberOfRaysPerPixel = 1000.0;
+	constBuffData.NumberOfRaysPerPixel = 10.0;
 
 	constBuffData.SunLightDirection = float4(0, -1, 0);
 	constBuffData.SkyColorHorizon = float4(1, 0, 0);
 	constBuffData.SkyColorZenith = float4(1, 1, 0);
 	constBuffData.GroundColor = float4(1, 1, 0);
-	constBuffData.SunColor = float4(1, 1, 1);
+	constBuffData.SunColor = float4(0, 1, 0);
 	constBuffData.SunFocus = 1;
-	constBuffData.SunIntensity = 1;
+	constBuffData.SunIntensity = 2;
 	constBuffData.EnvironmentIntensity = 0;
 	constBuffData.isTestVisualizer = isTestVisualizer;
 	constBuffData.screenWidth = viewPortWidth;
@@ -104,7 +105,15 @@ void Triangle::createData(ObjReader& reader)
 {
 	Nodes = reader.bvhObject.Nodes;
 	Triangles = reader.bvhObject.Triangles;
+
+	reader.bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 0, 0), float3(1, 1, 1));
 	MeshInfos.push_back(reader.bvhObject.MeshInfo);
+	for (int i = 0; i < 10; i++)
+	{
+		break;
+		reader.bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(1, 0, i-5), float3(0, 0, 0), float3(1, 1, 1));
+		MeshInfos.push_back(reader.bvhObject.MeshInfo);
+	}
 
 	return;
 }
@@ -131,7 +140,6 @@ void Triangle::createMesh(Renderer& renderer)
 
 	RenderData constBuffData;
 	constBuffData.frame = 0.0;
-	constBuffData.NumberOfRaysPerPixel = 1.0;
 
 	D3D11_SUBRESOURCE_DATA InitData;
 	InitData.pSysMem = &constBuffData;

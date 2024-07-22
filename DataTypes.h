@@ -92,13 +92,62 @@ struct float4 {
 		z = _z;
 		w = _w;
 	}
+	float operator[](int index)
+	{
+		switch (index)
+		{
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		case 3:
+			return w;
+		default:
+			throw std::out_of_range("Wrong index");
+			return 0;
+		}
+	}
+};
+
+struct float4x4 {
+	float4 r1;
+	float4 r2;
+	float4 r3;
+	float4 r4;
+	float4x4() {}
+	float4x4(float4 _r1, float4 _r2, float4 _r3, float4 _r4)
+	{
+		r1 = _r1;
+		r2 = _r2;
+		r3 = _r3;
+		r4 = _r4;
+	}
+	float4* operator[](int index)
+	{
+		switch (index)
+		{
+		case 0:
+			return &r1;
+		case 1:
+			return &r2;
+		case 2:
+			return &r3;
+		case 3:
+			return &r4;
+		default:
+			throw std::out_of_range("Wrong index");
+			return nullptr;
+		}
+	}
 };
 
 struct RenderData {
 	float frame;
+	float NumberOfRaysPerPixel;
 	int NumberOfSpheres;
 	int NumMeshes;
-	float NumberOfRaysPerPixel;
 
 	float4 SunLightDirection;
 	float4 SkyColorHorizon;

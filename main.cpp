@@ -25,7 +25,7 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	ObjReader reader;
 	reader.ReadFile("dragonlow.obj");
 
-	Window window(1920, 1080);
+	Window window(1920/2, 1080/2);
 	Renderer renderer(window);
 	Triangle triangle(renderer, reader);
 	Accumulator accumulator(renderer);
@@ -76,20 +76,25 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		wchar_t frameText[256];
 		swprintf_s(frameText, L"%d", curFrame);
 
-		if (curFrame % 100 == 0)
+		if (curFrame % 1 == 0)
 		{
 			renderer.CreateText(frameText);
 			renderer.Present();
 		}
+		continue;
+		renderer.saveRenderTexture(textureUtil.prevRenderTexture, "C:/Users/Administrator/Desktop/test/rtx.dds");
 
-		//renderer.saveRenderTexture(textureUtil.currentRenderTexture, "C:/Users/Administrator/Desktop/test/rtx.dds");
-		/*
 		std::string outFolder = "C:/Users/Administrator/Desktop/test/";
 		outFolder += "accumulator";
 		outFolder += std::to_string(accumulator.frame);
 		outFolder += ".dds";
-		*/
-		//renderer.saveRenderTexture(textureUtil.prevRenderTexture, outFolder.c_str());
+		
+		renderer.saveRenderTexture(textureUtil.prevRenderTexture, outFolder.c_str());
+
+		if (curFrame == 10)
+		{
+			break;
+		}
 	}
 
 	return 0;

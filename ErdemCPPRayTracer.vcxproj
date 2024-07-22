@@ -149,6 +149,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="TextureUtils.cpp" />
     <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="VectorUtils.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +161,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="TextureUtils.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="VectorUtils.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

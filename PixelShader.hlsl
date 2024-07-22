@@ -11,19 +11,21 @@ float _triThreshold;
 cbuffer ConstantBuffer : register(b0)
 {
     float Frame;
+    float NumberOfRaysPerPixel;
     int NumSpheres;
     int NumMeshes;
-    float NumberOfRaysPerPixel;
 	
     float4 SunLightDirection;
     float4 SkyColorHorizon;
     float4 SkyColorZenith;
     float4 GroundColor;
     float4 SunColor;
+	
     float SunFocus;
     float SunIntensity;
     float EnvironmentIntensity;
     float screenWidth;
+	
     float screenHeight;
     float _float1;
     float _float2;
@@ -92,8 +94,12 @@ struct MeshInfo
 	int numTriangles;
 	int firstTriangleIndex;
 	int nodesStartIndex;
+    int _;
 	float3 boundsMin;
-	float3 boundsMax;
+    float3 boundsMax;
+    float _1;
+    float _2;
+    float4x4 modelWorldToLocalMaxtix;
 	RayTracingMaterial material;
 };
 
@@ -262,8 +268,12 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 	{
 		MeshInfo meshInfo = Meshes[j];
 		BVHNode firstNode = Nodes[meshInfo.nodesStartIndex];
-
-        HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, ray, stats);
+		
+        Ray newRay = ray;
+        newRay.origin = mul(meshInfo.modelWorldToLocalMaxtix, float4(ray.origin, 1));
+        newRay.dir = mul(meshInfo.modelWorldToLocalMaxtix, float4(ray.dir, 0));
+		
+        HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, newRay, stats);
 		if (hitInfo.didHit && hitInfo.dst < closestHit.dst)
 		{
 			closestHit = hitInfo;
@@ -333,7 +343,7 @@ float3 GetEnvironmentBackGround(Ray ray)
 }
 
 float3 Trace(Ray ray, inout int rngState)
-{
+{	
 	float3 incomingLight = 0;
 	float3 rayColor = 1;
 	//bool hasHit = false;
@@ -493,7 +503,7 @@ float4 main(Input input) : SV_TARGET
     float zRange = farPlane - nearPlane;
 	
 	float translateX = 0;
-	float3 _WorldSpaceCameraPos = float3(1,0,0);
+	float3 _WorldSpaceCameraPos = float3(2,0,0);
 	float4x4 CamLocalToWorldMatrix = CreateLocalToWorldMatrix(float3(1,1,1), float3(0,-3.14/2.0,0), _WorldSpaceCameraPos);
 
 	float planeHeight = nearPlane * tan(radians(cameraFOV * 0.5f)) * 2;
@@ -508,8 +518,8 @@ float4 main(Input input) : SV_TARGET
 	ray.origin = _WorldSpaceCameraPos;
 	ray.dir = normalize(viewPoint - ray.origin);
 
-	float3 totalLight = 0;
-    float rayCount = isTestVisualizer == 0 ? 1 : NumberOfRaysPerPixel;
+    float3 totalLight = float3(0, 0, 0);
+    float rayCount = isTestVisualizer == 1 ? 1 : NumberOfRaysPerPixel;
 	
     for (int i = 0; i < rayCount; i++)
 	{
