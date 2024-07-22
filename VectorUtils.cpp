@@ -36,8 +36,6 @@ float4x4 VectorUtils::CreateWorldToLocalMatrix(float3 pos, float3 rot, float3 sc
 	r[2][1] = sin(rotxRad) * cos(rotyRad);
 	r[2][2] = cos(rotxRad) * cos(rotyRad);
 
-	m = r;
-
 	// We need inverse matrix here
 	*matrix[0] = float4(m[0][0], m[1][0], m[2][0], m[3][0]);
 	*matrix[1] = float4(m[0][1], m[1][1], m[2][1], m[3][1]);
