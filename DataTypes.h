@@ -95,7 +95,7 @@ struct float4 {
 };
 
 struct RenderData {
-	int frame;
+	float frame;
 	int NumberOfSpheres;
 	int NumMeshes;
 	float NumberOfRaysPerPixel;

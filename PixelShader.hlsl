@@ -10,7 +10,7 @@ float _triThreshold;
 
 cbuffer ConstantBuffer : register(b0)
 {
-    int Frame;
+    float Frame;
     int NumSpheres;
     int NumMeshes;
     float NumberOfRaysPerPixel;

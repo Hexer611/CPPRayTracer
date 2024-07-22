@@ -4,6 +4,9 @@
 #include <iostream>
 #include "BVHDataTypes.h"
 #include "ObjReader.h"
+#include <cstdlib>
+#include <time.h> 
+#include <iostream> 
 
 Triangle::Triangle(Renderer& renderer, ObjReader& reader)
 {
@@ -66,15 +69,15 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.frame = frame;
 	constBuffData.NumberOfSpheres = 3;
 	constBuffData.NumMeshes = MeshInfos.size();
-	constBuffData.NumberOfRaysPerPixel = 1.0;
+	constBuffData.NumberOfRaysPerPixel = 1000.0;
 
-	constBuffData.SunLightDirection = float4(-1, -1, -1);
+	constBuffData.SunLightDirection = float4(0, -1, 0);
 	constBuffData.SkyColorHorizon = float4(1, 0, 0);
 	constBuffData.SkyColorZenith = float4(1, 1, 0);
 	constBuffData.GroundColor = float4(1, 1, 0);
-	constBuffData.SunColor = float4(1, 1, 0);
+	constBuffData.SunColor = float4(1, 1, 1);
 	constBuffData.SunFocus = 1;
-	constBuffData.SunIntensity = 0;
+	constBuffData.SunIntensity = 1;
 	constBuffData.EnvironmentIntensity = 0;
 	constBuffData.isTestVisualizer = isTestVisualizer;
 	constBuffData.screenWidth = viewPortWidth;

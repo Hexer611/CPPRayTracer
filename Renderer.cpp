@@ -64,7 +64,7 @@ void Renderer::setRenderTarget()
 	m_deviceContext->RSSetViewports(1, &viewPort);
 
 	// Set the background color
-	float clearColor[] = { .25f, .5f, 1, 1 };
+	float clearColor[] = { 0.f, 0.f, 0.f, 1.f };
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 }
 
@@ -94,6 +94,9 @@ void Renderer::CreateText(const wchar_t* text)
 void Renderer::Present()
 {
 	m_swapChain->Present(1, 0);
+
+	float clearColor[] = { 0.f, 0.f, 0.f, 1.f };
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, clearColor);
 }
 
 void Renderer::copyRenderTexture(ID3D11Texture2D** target)
