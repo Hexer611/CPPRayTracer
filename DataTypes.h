@@ -111,6 +111,31 @@ struct float4 {
 	}
 };
 
+struct float3x3 {
+	float _array[3][3];
+	float3x3() {}
+	float3x3(float3 _r1, float3 _r2, float3 _r3)
+	{
+		_array[0][0] = _r1.x;
+		_array[0][1] = _r1.y;
+		_array[0][2] = _r1.z;
+
+		_array[1][0] = _r2.x;
+		_array[1][1] = _r2.y;
+		_array[1][2] = _r2.z;
+
+		_array[2][0] = _r3.x;
+		_array[2][1] = _r3.y;
+		_array[2][2] = _r3.z;
+	}
+	float Determinant()
+	{
+		float pos = _array[0][0] * _array[1][1] * _array[2][2] + _array[1][0] * _array[2][1] * _array[0][2] + _array[2][0] * _array[0][1] * _array[1][2];
+		float neg = _array[0][2] * _array[1][1] * _array[2][0] + _array[0][1] * _array[1][0] * _array[2][2] + _array[0][0] * _array[1][2] * _array[2][1];
+		return pos - neg;
+	}
+};
+
 struct float4x4 {
 	float _array[4][4];
 	float4x4() {}
@@ -143,9 +168,131 @@ struct float4x4 {
 		_array[3][3] = _r4.w;
 	}
 	
+	float4x4 Transpose()
+	{
+		float resultArray[4][4];
+
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				resultArray[i][j] = _array[j][i];
+
+		return resultArray;
+	}
+
+	float4x4 Adjacent()
+	{
+		float resultArray[4][4];
+
+		///Row-1
+		resultArray[0][0] = float3x3(float3(_array[1][1], _array[1][2], _array[1][3]), 
+									 float3(_array[2][1], _array[2][2], _array[2][3]), 
+									 float3(_array[3][1], _array[3][2], _array[3][3])).Determinant();
+
+		resultArray[0][1] = -float3x3(float3(_array[1][0], _array[1][2], _array[1][3]),
+									  float3(_array[2][0], _array[2][2], _array[2][3]),
+									  float3(_array[3][0], _array[3][2], _array[3][3])).Determinant();
+
+		resultArray[0][2] = float3x3(float3(_array[1][0], _array[1][1], _array[1][3]),
+									 float3(_array[2][0], _array[2][1], _array[2][3]),
+									 float3(_array[3][0], _array[3][1], _array[3][3])).Determinant();
+
+		resultArray[0][3] = -float3x3(float3(_array[1][0], _array[1][1], _array[1][2]),
+									  float3(_array[2][0], _array[2][1], _array[2][2]),
+									  float3(_array[3][0], _array[3][1], _array[3][2])).Determinant();
+		///Row-2
+		resultArray[1][0] = -float3x3(float3(_array[0][1], _array[0][2], _array[0][3]), 
+									 float3(_array[2][1], _array[2][2], _array[2][3]), 
+									 float3(_array[3][1], _array[3][2], _array[3][3])).Determinant();
+
+		resultArray[1][1] = float3x3(float3(_array[0][0], _array[0][2], _array[0][3]),
+									  float3(_array[2][0], _array[2][2], _array[2][3]),
+									  float3(_array[3][0], _array[3][2], _array[3][3])).Determinant();
+
+		resultArray[1][2] = -float3x3(float3(_array[0][0], _array[0][1], _array[0][3]),
+									 float3(_array[2][0], _array[2][1], _array[2][3]),
+									 float3(_array[3][0], _array[3][1], _array[3][3])).Determinant();
+
+		resultArray[1][3] = float3x3(float3(_array[0][0], _array[0][1], _array[0][2]),
+									  float3(_array[2][0], _array[2][1], _array[2][2]),
+									  float3(_array[3][0], _array[3][1], _array[3][2])).Determinant();
+		///Row-3
+		resultArray[2][0] = float3x3(float3(_array[0][1], _array[0][2], _array[0][3]), 
+									 float3(_array[1][1], _array[1][2], _array[1][3]), 
+									 float3(_array[3][1], _array[3][2], _array[3][3])).Determinant();
+
+		resultArray[2][1] = -float3x3(float3(_array[0][0], _array[0][2], _array[0][3]),
+									  float3(_array[1][0], _array[1][2], _array[1][3]),
+									  float3(_array[3][0], _array[3][2], _array[3][3])).Determinant();
+
+		resultArray[2][2] = float3x3(float3(_array[0][0], _array[0][1], _array[0][3]),
+									 float3(_array[1][0], _array[1][1], _array[1][3]),
+									 float3(_array[3][0], _array[3][1], _array[3][3])).Determinant();
+
+		resultArray[2][3] = -float3x3(float3(_array[0][0], _array[0][1], _array[0][2]),
+									  float3(_array[1][0], _array[1][1], _array[1][2]),
+									  float3(_array[3][0], _array[3][1], _array[3][2])).Determinant();
+		///Row-4
+		resultArray[3][0] = -float3x3(float3(_array[0][1], _array[0][2], _array[0][3]), 
+									 float3(_array[1][1], _array[1][2], _array[1][3]), 
+									 float3(_array[2][1], _array[2][2], _array[2][3])).Determinant();
+
+		resultArray[3][1] = float3x3(float3(_array[0][0], _array[0][2], _array[0][3]),
+									  float3(_array[1][0], _array[1][2], _array[1][3]),
+									  float3(_array[2][0], _array[2][2], _array[2][3])).Determinant();
+
+		resultArray[3][2] = -float3x3(float3(_array[0][0], _array[0][1], _array[0][3]),
+									 float3(_array[1][0], _array[1][1], _array[1][3]),
+									 float3(_array[2][0], _array[2][1], _array[2][3])).Determinant();
+
+		resultArray[3][3] = float3x3(float3(_array[0][0], _array[0][1], _array[0][2]),
+									  float3(_array[1][0], _array[1][1], _array[1][2]),
+									  float3(_array[2][0], _array[2][1], _array[2][2])).Determinant();
+
+		return resultArray;
+	}
+
+	float Determinant()
+	{
+		float a1 = _array[0][0] * float3x3(float3(_array[1][1], _array[1][2], _array[1][3]),
+			float3(_array[2][1], _array[2][2], _array[2][3]),
+			float3(_array[3][1], _array[3][2], _array[3][3])).Determinant();
+
+		float a2 = -_array[0][1] * float3x3(float3(_array[1][0], _array[1][2], _array[1][3]),
+			float3(_array[2][0], _array[2][2], _array[2][3]),
+			float3(_array[3][0], _array[3][2], _array[3][3])).Determinant();
+
+		float a3 = _array[0][2] * float3x3(float3(_array[1][0], _array[1][1], _array[1][3]),
+			float3(_array[2][0], _array[2][1], _array[2][3]),
+			float3(_array[3][0], _array[3][1], _array[3][3])).Determinant();
+
+		float a4 = -_array[0][3] * float3x3(float3(_array[1][0], _array[1][1], _array[1][2]),
+			float3(_array[2][0], _array[2][1], _array[2][2]),
+			float3(_array[3][0], _array[3][1], _array[3][2])).Determinant();
+
+		return a1 + a2 + a3 + a4;
+	}
+
+	float4x4 Invert()
+	{
+		return Adjacent().Transpose() * (1.0 / Determinant());
+	}
+
 	float4 operator[](int index1)
 	{
 		return float4(_array[index1][0], _array[index1][1], _array[index1][2], _array[index1][3]);
+	}
+
+	float4x4 operator*(float value)
+	{
+		float rslt[4][4];
+
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+			{
+				rslt[i][j] = _array[i][j] * value;
+			}
+
+		return rslt;
 	}
 
 	float4x4 operator*(float4x4 newMatrix)

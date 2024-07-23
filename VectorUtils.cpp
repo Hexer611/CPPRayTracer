@@ -36,19 +36,19 @@ float4x4 VectorUtils::CreateWorldToLocalMatrix(float3 pos, float3 rot, float3 sc
 	r[2][1] = sin(rotxRad) * cos(rotyRad);
 	r[2][2] = cos(rotxRad) * cos(rotyRad);
 	
+	float s[4][4];
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			s[i][j] = (i == j) ? 1 : 0;
+
+	s[0][0] = scale.x;
+	s[1][1] = scale.y;
+	s[2][2] = scale.z;
+
 	float4x4 tMatrix = float4x4(t);
 	float4x4 rMatrix = float4x4(r);
+	float4x4 sMatrix = float4x4(s);
 
-	float4x4 resultMatrix = tMatrix * rMatrix;
-
-	// We need inverse matrix here
-	//*matrix[0] = float4(m[0][0], m[1][0], m[2][0], m[3][0]);
-	//*matrix[1] = float4(m[0][1], m[1][1], m[2][1], m[3][1]);
-	//*matrix[2] = float4(m[0][2], m[1][2], m[2][2], m[3][2]);
-	//*matrix[3] = float4(m[0][3], m[1][3], m[2][3], m[3][3]);
-	auto tmp = resultMatrix._array[0][2];
-	resultMatrix._array[0][2] = resultMatrix._array[2][0];
-	resultMatrix._array[2][0] = tmp;
-
-	return resultMatrix;
+	float4x4 resultMatrix = tMatrix * (rMatrix * sMatrix);
+	return resultMatrix.Invert();
 }

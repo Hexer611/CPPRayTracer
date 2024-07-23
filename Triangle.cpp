@@ -87,7 +87,7 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.isTestVisualizer = isTestVisualizer;
 	constBuffData.screenWidth = viewPortWidth;
 	constBuffData.screenHeight = viewPortHeight;
-	constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, frame * 1, 0), float3(1, 1, 1));
+	constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(30, frame * 1, 0), float3(1, 1, 1));
 
 	if (isTestVisualizer == 0)
 		frame += 1;
