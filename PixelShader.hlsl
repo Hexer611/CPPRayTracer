@@ -35,6 +35,8 @@ cbuffer ConstantBuffer : register(b0)
     int _bool1;
     int _bool2;
     int _bool3;
+	
+    float4x4 modelWorldToLocalMaxtix;
 };
 
 struct appdata
@@ -270,8 +272,9 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 		BVHNode firstNode = Nodes[meshInfo.nodesStartIndex];
 		
         Ray newRay = ray;
-        newRay.origin = mul(meshInfo.modelWorldToLocalMaxtix, float4(ray.origin, 1));
-        newRay.dir = mul(meshInfo.modelWorldToLocalMaxtix, float4(ray.dir, 0));
+		// TODO: modelWorldToLocalMaxtix -> model.modelWorldToLocalMaxtix
+        newRay.origin = mul(modelWorldToLocalMaxtix, float4(ray.origin, 1));
+        newRay.dir = mul(modelWorldToLocalMaxtix, float4(ray.dir, 0));
 		
         HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, newRay, stats);
 		if (hitInfo.didHit && hitInfo.dst < closestHit.dst)
@@ -503,7 +506,7 @@ float4 main(Input input) : SV_TARGET
     float zRange = farPlane - nearPlane;
 	
 	float translateX = 0;
-	float3 _WorldSpaceCameraPos = float3(2,0,0);
+	float3 _WorldSpaceCameraPos = float3(1,0,0);
 	float4x4 CamLocalToWorldMatrix = CreateLocalToWorldMatrix(float3(1,1,1), float3(0,-3.14/2.0,0), _WorldSpaceCameraPos);
 
 	float planeHeight = nearPlane * tan(radians(cameraFOV * 0.5f)) * 2;

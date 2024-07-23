@@ -68,8 +68,8 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 
 		if (triangle.isTestVisualizer == 0)
 		{
-			accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
-			renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
+			//accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
+			//renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 		}
 
 		curFrame++;

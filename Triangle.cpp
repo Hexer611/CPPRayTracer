@@ -34,6 +34,10 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	SphereData.spheres[0] = {};
 	SphereData.spheres[1] = {};
 	SphereData.spheres[2] = {};
+
+	SphereData.spheres[0].material.emissionStrength = 0;
+	SphereData.spheres[1].material.emissionStrength = 0;
+	SphereData.spheres[2].material.emissionStrength = 0;
 	/*
 	SphereData.spheres[0].position = float3(0, -2, -2);
 	SphereData.spheres[0].radius = 2;
@@ -83,6 +87,7 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.isTestVisualizer = isTestVisualizer;
 	constBuffData.screenWidth = viewPortWidth;
 	constBuffData.screenHeight = viewPortHeight;
+	constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, frame * 1, 0), float3(1, 1, 1));
 
 	if (isTestVisualizer == 0)
 		frame += 1;

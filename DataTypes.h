@@ -112,34 +112,57 @@ struct float4 {
 };
 
 struct float4x4 {
-	float4 r1;
-	float4 r2;
-	float4 r3;
-	float4 r4;
+	float _array[4][4];
 	float4x4() {}
+	float4x4(float _newarray[4][4])
+	{
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				_array[i][j] = _newarray[i][j];
+	}
 	float4x4(float4 _r1, float4 _r2, float4 _r3, float4 _r4)
 	{
-		r1 = _r1;
-		r2 = _r2;
-		r3 = _r3;
-		r4 = _r4;
+		_array[0][0] = _r1.x;
+		_array[0][1] = _r1.y;
+		_array[0][2] = _r1.z;
+		_array[0][3] = _r1.w;
+
+		_array[1][0] = _r2.x;
+		_array[1][1] = _r2.y;
+		_array[1][2] = _r2.z;
+		_array[1][3] = _r2.w;
+
+		_array[2][0] = _r3.x;
+		_array[2][1] = _r3.y;
+		_array[2][2] = _r3.z;
+		_array[2][3] = _r3.w;
+
+		_array[3][0] = _r4.x;
+		_array[3][1] = _r4.y;
+		_array[3][2] = _r4.z;
+		_array[3][3] = _r4.w;
 	}
-	float4* operator[](int index)
+	
+	float4 operator[](int index1)
 	{
-		switch (index)
-		{
-		case 0:
-			return &r1;
-		case 1:
-			return &r2;
-		case 2:
-			return &r3;
-		case 3:
-			return &r4;
-		default:
-			throw std::out_of_range("Wrong index");
-			return nullptr;
-		}
+		return float4(_array[index1][0], _array[index1][1], _array[index1][2], _array[index1][3]);
+	}
+
+	float4x4 operator*(float4x4 newMatrix)
+	{
+		float rslt[4][4];
+
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+			{
+				rslt[i][j] = 0;
+
+				for (int k = 0; k < 4; k++) {
+					rslt[i][j] += _array[i][k] * newMatrix[k][j];
+				}
+			}
+
+		return rslt;
 	}
 };
 
@@ -154,10 +177,12 @@ struct RenderData {
 	float4 SkyColorZenith;
 	float4 GroundColor;
 	float4 SunColor;
+
 	float SunFocus;
 	float SunIntensity;
 	float EnvironmentIntensity;
 	float screenWidth;
+
 	float screenHeight;
 	float _float1;
 	float _float2;
@@ -167,6 +192,8 @@ struct RenderData {
 	int _bool1;
 	int _bool2;
 	int _bool3;
+
+	float4x4 test_modelWorldToLocalMaxtix;
 };
 
 struct AccumulatorData {
