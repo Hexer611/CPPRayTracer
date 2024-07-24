@@ -36,7 +36,8 @@ cbuffer ConstantBuffer : register(b0)
     int _bool2;
     int _bool3;
 	
-    float4x4 modelWorldToLocalMaxtix;
+    float4x4 modelWorldToLocalMatrix;
+    float4x4 modelLocalToWorldMatrix;
 };
 
 struct appdata
@@ -55,6 +56,7 @@ struct Ray
 {
 	float3 origin;
 	float3 dir;
+    float3 invDir;
 };
 			
 struct RayTracingMaterial
@@ -101,7 +103,8 @@ struct MeshInfo
     float3 boundsMax;
     float _1;
     float _2;
-    float4x4 modelWorldToLocalMaxtix;
+    float4x4 modelWorldToLocalMatrix;
+    float4x4 modelLocalToWorldMatrix;
 	RayTracingMaterial material;
 };
 
@@ -131,9 +134,8 @@ StructuredBuffer<MeshInfo> Meshes : register(t4);
 
 float NoBoundsHit(Ray ray, float3 boxMin, float3 boxMax)
 {
-	float3 invDir = 1 / ray.dir;
-	float3 tMin = (boxMin - ray.origin) * invDir;
-	float3 tMax = (boxMax - ray.origin) * invDir;
+    float3 tMin = (boxMin - ray.origin) * (ray.invDir);
+    float3 tMax = (boxMax - ray.origin) * (ray.invDir);
 	float3 t1 = min(tMin, tMax);
 	float3 t2 = max(tMin, tMax);
 	float tNear = max(max(t1.x, t1.y), t1.z);
@@ -188,7 +190,7 @@ HitInfo RayTriangle(Ray ray, Triangle tri)
 
 	// Initialize hit info
 	HitInfo hitInfo;
-	hitInfo.didHit = determinant >= 1E-6 && dst >= 0 && u >= 0 && v >= 0 && w >= 0;
+	hitInfo.didHit = determinant >= 1E-8 && dst >= 0 && u >= 0 && v >= 0 && w >= 0;
 	hitInfo.hitPoint = ray.origin + ray.dir * dst;
 	hitInfo.normal = normalize(tri.normalA * w + tri.normalB * u + tri.normalC * v);
 	hitInfo.dst = dst;
@@ -253,6 +255,8 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 	HitInfo closestHit = (HitInfo)0;
 	closestHit.dst = 1.#INF;
 	
+    Ray localRay = ray;	
+	
 	for (int i = 0; i < NumSpheres; i++)
 	{
 		Sphere sphere = Spheres[i];
@@ -271,16 +275,19 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 		MeshInfo meshInfo = Meshes[j];
 		BVHNode firstNode = Nodes[meshInfo.nodesStartIndex];
 		
-        Ray newRay = ray;
 		// TODO: modelWorldToLocalMaxtix -> model.modelWorldToLocalMaxtix
-        newRay.origin = mul(modelWorldToLocalMaxtix, float4(ray.origin, 1));
-        newRay.dir = mul(modelWorldToLocalMaxtix, float4(ray.dir, 0));
+        localRay.origin = mul(modelWorldToLocalMatrix, float4(ray.origin, 1));
+        localRay.dir = mul(modelWorldToLocalMatrix, float4(ray.dir, 0));
+        localRay.invDir = 1.0 / localRay.dir;
 		
-        HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, newRay, stats);
+        HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, localRay, stats);
 		if (hitInfo.didHit && hitInfo.dst < closestHit.dst)
 		{
-			closestHit = hitInfo;
-			closestHit.material = meshInfo.material;
+            closestHit.didHit = true;
+            closestHit.dst = hitInfo.dst;
+            closestHit.normal = normalize(mul(modelLocalToWorldMatrix, float4(hitInfo.normal, 0)));
+            closestHit.hitPoint = ray.origin + ray.dir * hitInfo.dst;
+            closestHit.material = meshInfo.material;
         }
     }
 
@@ -506,8 +513,11 @@ float4 main(Input input) : SV_TARGET
     float zRange = farPlane - nearPlane;
 	
 	float translateX = 0;
-	float3 _WorldSpaceCameraPos = float3(1,0,0);
-	float4x4 CamLocalToWorldMatrix = CreateLocalToWorldMatrix(float3(1,1,1), float3(0,-3.14/2.0,0), _WorldSpaceCameraPos);
+    float angle = 0.01 * Frame;
+    angle = 0;
+    float radius = 1;
+    float3 _WorldSpaceCameraPos = float3(cos(angle) * radius, 0, sin(angle) * radius);
+    float4x4 CamLocalToWorldMatrix = CreateLocalToWorldMatrix(float3(1, 1, 1), float3(0, -3.14 / 2.0 - angle, 0), _WorldSpaceCameraPos);
 
 	float planeHeight = nearPlane * tan(radians(cameraFOV * 0.5f)) * 2;
     float planeWidth = planeHeight * aspectRatio;

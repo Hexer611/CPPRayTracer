@@ -58,6 +58,8 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 			{
 				break;
 			}
+			triangle.xRot = msg.pt.x;
+			triangle.yRot = msg.pt.y;
 		}
 
 		// Main loop

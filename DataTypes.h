@@ -341,6 +341,7 @@ struct RenderData {
 	int _bool3;
 
 	float4x4 test_modelWorldToLocalMaxtix;
+	float4x4 test_modelLocalToWorldMaxtix;
 };
 
 struct AccumulatorData {

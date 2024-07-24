@@ -46,9 +46,11 @@ float4x4 VectorUtils::CreateWorldToLocalMatrix(float3 pos, float3 rot, float3 sc
 	s[2][2] = scale.z;
 
 	float4x4 tMatrix = float4x4(t);
+	tMatrix = tMatrix.Transpose();
 	float4x4 rMatrix = float4x4(r);
 	float4x4 sMatrix = float4x4(s);
 
 	float4x4 resultMatrix = tMatrix * (rMatrix * sMatrix);
-	return resultMatrix.Invert();
+	float4x4 resultInvertedMatrix = resultMatrix.Invert();
+	return resultInvertedMatrix;
 }

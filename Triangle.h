@@ -19,6 +19,8 @@ public:
 	// Viewport
 	int viewPortWidth;
 	int viewPortHeight;
+	float xRot = 0;
+	float yRot = 0;
 private:
 	float frame = 0;
 	void createData(ObjReader& reader);

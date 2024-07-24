@@ -72,7 +72,7 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 
 	RenderData constBuffData;
 	constBuffData.frame = rand() / 32767.0;
-	constBuffData.NumberOfSpheres = 3;
+	constBuffData.NumberOfSpheres = 0;
 	constBuffData.NumMeshes = MeshInfos.size();
 	constBuffData.NumberOfRaysPerPixel = 10.0;
 
@@ -87,7 +87,9 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.isTestVisualizer = isTestVisualizer;
 	constBuffData.screenWidth = viewPortWidth;
 	constBuffData.screenHeight = viewPortHeight;
-	constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(30, frame * 1, 0), float3(1, 1, 1));
+	constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0,0,0), float3(0, frame, 0), float3(1,1,1));
+	constBuffData.test_modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0,0,0), float3(0, frame, 0), float3(1,1,1)).Invert();
+	//constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 0, 0), float3(1, 1, 1));
 
 	if (isTestVisualizer == 0)
 		frame += 1;
@@ -111,14 +113,9 @@ void Triangle::createData(ObjReader& reader)
 	Nodes = reader.bvhObject.Nodes;
 	Triangles = reader.bvhObject.Triangles;
 
-	reader.bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 0, 0), float3(1, 1, 1));
+	reader.bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 120, 0), float3(1, 1, 1));
+	reader.bvhObject.MeshInfo.modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 120, 0), float3(1, 1, 1)).Invert();
 	MeshInfos.push_back(reader.bvhObject.MeshInfo);
-	for (int i = 0; i < 10; i++)
-	{
-		break;
-		reader.bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(1, 0, i-5), float3(0, 0, 0), float3(1, 1, 1));
-		MeshInfos.push_back(reader.bvhObject.MeshInfo);
-	}
 
 	return;
 }
