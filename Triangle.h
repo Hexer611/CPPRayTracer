@@ -7,12 +7,14 @@
 
 class Triangle {
 public:
-	Triangle(Renderer& renderer, ObjReader& reader);
+	Triangle(Renderer& renderer);
 	~Triangle();
 	void draw(Renderer& renderer);
 	void addSpheres(ID3D11DeviceContext* deviceContext);
 	void addTriangles(ID3D11DeviceContext* device);
 	void updateRenderData(ID3D11DeviceContext* deviceContext);
+	void addData(ObjReader& reader);
+	void createBuffers(Renderer& renderer);
 	
 	int isTestVisualizer;
 
@@ -23,8 +25,7 @@ public:
 	float yRot = 0;
 private:
 	float frame = 0;
-	void createData(ObjReader& reader);
-	void createMesh(Renderer& renderer);
+	void createData();
 	void createShaders(Renderer& renderer);
 
 	RenderData* m_renderData = nullptr;

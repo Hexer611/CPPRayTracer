@@ -23,11 +23,14 @@ INT WindowHeight;
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 {
 	ObjReader reader;
-	reader.ReadFile("dragonlow.obj");
+	reader.ReadFile("dragonlow.obj", false, float3(0,0,1), float3(), float3(1,1,1)/2);
+
+	ObjReader reader1;
+	reader1.ReadFile("suzanne.obj", false, float3(0,0,0), float3(0,-90,0), float3(1,1,1)/2);
 
 	Window window(1920/2, 1080/2);
 	Renderer renderer(window);
-	Triangle triangle(renderer, reader);
+	Triangle triangle(renderer);
 	Accumulator accumulator(renderer);
 	TextureUtils textureUtil(renderer.m_backBufferDesc, renderer.getDevice());
 
@@ -38,6 +41,11 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 
 	textureUtil.createRenderTextureView(&resultTexture);
 	textureUtil.prevRenderTexture = resultTexture;
+
+	triangle.addData(reader);
+	triangle.addData(reader1);
+
+	triangle.createBuffers(renderer);
 
 	triangle.draw(renderer);
 	renderer.copyRenderTexture(&textureUtil.prevRenderTexture);

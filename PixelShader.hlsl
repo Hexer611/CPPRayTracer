@@ -214,7 +214,7 @@ HitInfo BVHRayCollision(int firstNodeIndex, Ray ray, inout int2 stats)
 		{
 			stats[1] += curNode.triangleCount;
 			
-			for (int i = curNode.triangleIndex; i < curNode.triangleIndex + curNode.triangleCount; i++)
+            for (int i = curNode.triangleIndex; i < curNode.triangleIndex + curNode.triangleCount; i++)
 			{
 				Triangle tri = Triangles[i];
 				HitInfo triHitInfo = RayTriangle(ray, tri);
@@ -276,8 +276,8 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
 		BVHNode firstNode = Nodes[meshInfo.nodesStartIndex];
 		
 		// TODO: modelWorldToLocalMaxtix -> model.modelWorldToLocalMaxtix
-        localRay.origin = mul(modelWorldToLocalMatrix, float4(ray.origin, 1));
-        localRay.dir = mul(modelWorldToLocalMatrix, float4(ray.dir, 0));
+        localRay.origin = mul(meshInfo.modelWorldToLocalMatrix, float4(ray.origin, 1));
+        localRay.dir = mul(meshInfo.modelWorldToLocalMatrix, float4(ray.dir, 0));
         localRay.invDir = 1.0 / localRay.dir;
 		
         HitInfo hitInfo = BVHRayCollision(meshInfo.nodesStartIndex, localRay, stats);

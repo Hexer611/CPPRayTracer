@@ -7,6 +7,7 @@
 #include "BVHDataTypes.h"
 #include <iostream>
 #include "BVHCalculator.h"
+#include "VectorUtils.h"
 
 ObjReader::ObjReader()
 {
@@ -30,7 +31,7 @@ std::vector<std::string> split(const std::string& s, char delim) {
 	return result;
 }
 
-void ObjReader::ReadFile(const char filePath[], bool flattenFaces)
+void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, float3 rot, float3 scale)
 {
 	std::ifstream infile(filePath);
 	std::string line;
@@ -127,4 +128,7 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces)
 
 	BVHCalculator calculator;
 	bvhObject = calculator.CalculateBVH(rawObject);
+
+	bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale);
+	bvhObject.MeshInfo.modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale).Invert();
 }

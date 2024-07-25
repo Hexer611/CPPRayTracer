@@ -9,13 +9,12 @@
 #include <iostream>
 #include "VectorUtils.h"
 
-Triangle::Triangle(Renderer& renderer, ObjReader& reader)
+Triangle::Triangle(Renderer& renderer)
 {
 	viewPortWidth = renderer.viewPortWidth;
 	viewPortHeight = renderer.viewPortHeight;
 
-	createData(reader);
-	createMesh(renderer);
+	createData();
 	createShaders(renderer);
 }
 
@@ -87,8 +86,8 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.isTestVisualizer = isTestVisualizer;
 	constBuffData.screenWidth = viewPortWidth;
 	constBuffData.screenHeight = viewPortHeight;
-	constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0,0,0), float3(0, frame, 0), float3(1,1,1));
-	constBuffData.test_modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0,0,0), float3(0, frame, 0), float3(1,1,1)).Invert();
+	constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0,0,0), float3(0, frame, 0), float3(1,1,1)/3.0);
+	constBuffData.test_modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0,0,0), float3(0, frame, 0), float3(1,1,1)/3.0).Invert();
 	//constBuffData.test_modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 0, 0), float3(1, 1, 1));
 
 	if (isTestVisualizer == 0)
@@ -108,19 +107,34 @@ void Triangle::addTriangles(ID3D11DeviceContext* deviceContext)
 	deviceContext->PSSetShaderResources(4, 1, &m_meshResourceView);
 }
 
-void Triangle::createData(ObjReader& reader)
+void Triangle::createData()
 {
-	Nodes = reader.bvhObject.Nodes;
-	Triangles = reader.bvhObject.Triangles;
-
-	reader.bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 120, 0), float3(1, 1, 1));
-	reader.bvhObject.MeshInfo.modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(float3(0, 0, 0), float3(0, 120, 0), float3(1, 1, 1)).Invert();
-	MeshInfos.push_back(reader.bvhObject.MeshInfo);
-
-	return;
+	Nodes = std::vector<BVHNode>();
+	Triangles = std::vector<BVHTriangle>();
+	MeshInfos = std::vector<MeshInfo>();
 }
 
-void Triangle::createMesh(Renderer& renderer)
+void Triangle::addData(ObjReader& reader)
+{
+	int nodesSize = Nodes.size();
+	int triangleSize = Triangles.size();
+
+	reader.bvhObject.MeshInfo.nodesStartIndex = nodesSize;
+	reader.bvhObject.MeshInfo.firstTriangleIndex = triangleSize;
+
+	MeshInfos.push_back(reader.bvhObject.MeshInfo);
+
+	Nodes.insert(Nodes.end(), reader.bvhObject.Nodes.begin(), reader.bvhObject.Nodes.end());
+	Triangles.insert(Triangles.end(), reader.bvhObject.Triangles.begin(), reader.bvhObject.Triangles.end());
+
+	for (int i = 0; i < reader.bvhObject.Nodes.size(); i++)
+	{
+		Nodes[nodesSize + i].childIndex += nodesSize;
+		Nodes[nodesSize + i].triangleIndex += triangleSize;
+	}
+}
+
+void Triangle::createBuffers(Renderer& renderer)
 {
 	// Define our vertices
 	Vertex vertices[] = {
