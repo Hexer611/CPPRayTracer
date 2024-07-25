@@ -129,6 +129,6 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, f
 	BVHCalculator calculator;
 	bvhObject = calculator.CalculateBVH(rawObject);
 
-	bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale);
-	bvhObject.MeshInfo.modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale).Invert();
+	bvhObject.MeshInfo.modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale);
+	bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale).Invert();
 }

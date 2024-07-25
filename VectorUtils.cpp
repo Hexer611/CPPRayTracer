@@ -50,7 +50,6 @@ float4x4 VectorUtils::CreateWorldToLocalMatrix(float3 pos, float3 rot, float3 sc
 	float4x4 rMatrix = float4x4(r);
 	float4x4 sMatrix = float4x4(s);
 
-	float4x4 resultMatrix = tMatrix * (rMatrix * sMatrix);
-	float4x4 resultInvertedMatrix = resultMatrix.Invert();
-	return resultInvertedMatrix;
+	float4x4 resultMatrix = sMatrix * rMatrix * tMatrix;
+	return resultMatrix;
 }
