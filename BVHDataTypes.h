@@ -19,28 +19,88 @@ struct MeshInfo
 	RayTracingMaterial material;
 };
 
-struct BVHTriangle
+struct BVHTriangleData
 {
 	float3 posA, posB, posC;
 	float3 normalA, normalB, normalC;
-	
-	float3 Center()
-	{
-		return (posA + posB + posC) / 3.0;
-	}
-	float3 Min()
+};
+
+struct BVHTriangle
+{
+private:
+	float3 posA, posB, posC;
+	float3 normalA, normalB, normalC;
+	float3 _min;
+	float3 _max;
+	float3 _center;
+	float3 _normal;
+
+	void Recalculate()
 	{
 		float minX = min(min(posA.x, posB.x), posC.x);
 		float minY = min(min(posA.y, posB.y), posC.y);
 		float minZ = min(min(posA.z, posB.z), posC.z);
-		return float3(minX, minY, minZ);
-	}
-	float3 Max()
-	{
+		_min = float3(minX, minY, minZ);
+
 		float maxX = max(max(posA.x, posB.x), posC.x);
 		float maxY = max(max(posA.y, posB.y), posC.y);
 		float maxZ = max(max(posA.z, posB.z), posC.z);
-		return float3(maxX, maxY, maxZ);
+		_max = float3(maxX, maxY, maxZ);
+
+		_center = (posA + posB + posC) / 3.0;
+
+		float3 A = posB - posA;
+		float3 B = posC - posA;
+		_normal = A * B;
+		_normal = _normal.Normalize();
+	}
+public:
+	BVHTriangle(float3 _posA, float3 _posB, float3 _posC)
+	{
+		posA = _posA;
+		posB = _posB;
+		posC = _posC;
+		Recalculate();
+	}
+	BVHTriangle(float3 _posA, float3 _posB, float3 _posC, float3 _normalA, float3 _normalB, float3 _normalC)
+	{
+		posA = _posA;
+		posB = _posB;
+		posC = _posC;
+
+		normalA = _normalA;
+		normalB = _normalB;
+		normalC = _normalC;
+		Recalculate();
+	}
+	float3 Min()
+	{
+		return _min;
+	}
+	float3 Max()
+	{
+		return _max;
+	}
+	float3 Center()
+	{
+		return _center;
+	}
+	float3 Normal()
+	{
+		return _normal;
+	}
+	BVHTriangleData GetData()
+	{
+		BVHTriangleData trigData = {};
+		trigData.posA = posA;
+		trigData.posB = posB;
+		trigData.posC = posC;
+
+		trigData.normalA = normalA;
+		trigData.normalB = normalB;
+		trigData.normalC = normalC;
+
+		return trigData;
 	}
 };
 
@@ -100,7 +160,7 @@ struct BVHObject
 {
 	MeshInfo MeshInfo;
 	std::vector<BVHNode> Nodes;
-	std::vector<BVHTriangle> Triangles;
+	std::vector<BVHTriangleData> Triangles;
 };
 
 struct BVHObjectDebugData

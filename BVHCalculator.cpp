@@ -28,18 +28,16 @@ BVHObject BVHCalculator::CalculateBVH(RawObject rawObject)
 
 	for (int i = 0; i < rawObject.triangles.size(); i+=3)
 	{
-		BVHTriangle tri = {};
-		tri.posA = rawObject.vertices[rawObject.triangles[i]];
-		tri.posB = rawObject.vertices[rawObject.triangles[i + 1]];
-		tri.posC = rawObject.vertices[rawObject.triangles[i + 2]];
+		BVHTriangle tri = BVHTriangle
+		(
+			rawObject.vertices[rawObject.triangles[i]],
+			rawObject.vertices[rawObject.triangles[i + 1]],
+			rawObject.vertices[rawObject.triangles[i + 2]],
 
-		//tri.normalA = rawObject.normals[rawObject.triangles[i]];
-		//tri.normalB = rawObject.normals[rawObject.triangles[i + 1]];
-		//tri.normalC = rawObject.normals[rawObject.triangles[i + 2]];
-
-		tri.normalA = rawObject.normals[i];
-		tri.normalB = rawObject.normals[i + 1];
-		tri.normalC = rawObject.normals[i + 2];
+			rawObject.normals[i],
+			rawObject.normals[i + 1],
+			rawObject.normals[i + 2]
+		);
 
 		trigs.push_back(tri);
 	}
@@ -54,7 +52,15 @@ BVHObject BVHCalculator::CalculateBVH(RawObject rawObject)
 
 	nodes.push_back(&root);
 	Split(&root, 0);
-	newObject.Triangles = triangles;
+
+	std::vector<BVHTriangleData> triangleData = {};
+	
+	for (int i = 0; i < triangles.size(); i++)
+	{
+		triangleData.push_back(triangles[i].GetData());
+	}
+	
+	newObject.Triangles = triangleData;
 	
 	for (auto newNode : nodes)
 	{

@@ -110,7 +110,7 @@ void Triangle::addTriangles(ID3D11DeviceContext* deviceContext)
 void Triangle::createData()
 {
 	Nodes = std::vector<BVHNode>();
-	Triangles = std::vector<BVHTriangle>();
+	Triangles = std::vector<BVHTriangleData>();
 	MeshInfos = std::vector<MeshInfo>();
 }
 
@@ -217,8 +217,8 @@ void Triangle::createBuffers(Renderer& renderer)
 	triangleDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	triangleDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	triangleDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	triangleDesc.ByteWidth = sizeof(BVHTriangle) * Triangles.size(); // Total bytes
-	triangleDesc.StructureByteStride = sizeof(BVHTriangle); // Size of one object
+	triangleDesc.ByteWidth = sizeof(BVHTriangleData) * Triangles.size(); // Total bytes
+	triangleDesc.StructureByteStride = sizeof(BVHTriangleData); // Size of one object
 
 	D3D11_SUBRESOURCE_DATA trigsSubData = {};
 	trigsSubData.pSysMem = Triangles.data();

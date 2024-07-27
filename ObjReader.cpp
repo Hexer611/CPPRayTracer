@@ -42,7 +42,6 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, f
 	std::vector<int> trianglesvn = {}; // Vertex normal index
 	std::vector<float3> normals = {};
 
-	float multiplier = 1;
 	while (std::getline(infile, line))
 	{
 		if (line[0] == 'v' && line[1] == 'n')
@@ -89,10 +88,12 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, f
 		trianglesv[j+1] = trianglesv[j+1] - 1;
 		trianglesv[j+2] = trianglesv[j+2] - 1;
 
-		BVHTriangle newTrig = {};
-		newTrig.posA = vertices[trianglesv[j]];
-		newTrig.posB = vertices[trianglesv[j + 1]];
-		newTrig.posC = vertices[trianglesv[j + 2]];
+		BVHTriangle newTrig = BVHTriangle
+		(
+			vertices[trianglesv[j]],
+			vertices[trianglesv[j + 1]],
+			vertices[trianglesv[j + 2]]
+		);
 
 		float3 normal1;
 		float3 normal2;

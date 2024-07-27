@@ -39,7 +39,7 @@ private:
 	ID3D11Buffer* m_triangleBuffer = NULL;
 
 	std::vector<BVHNode> Nodes;
-	std::vector<BVHTriangle> Triangles;
+	std::vector<BVHTriangleData> Triangles;
 	std::vector<MeshInfo> MeshInfos;
 
 	ID3D11ShaderResourceView* m_nodeResourceView = nullptr;
