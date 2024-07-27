@@ -131,4 +131,33 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, f
 
 	bvhObject.MeshInfo.modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale);
 	bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale).Invert();
+
+	CalculateDebugData();
+}
+
+void ObjReader::CalculateDebugData()
+{
+	debugData.minLeafTrig = 9999;
+	debugData.maxLeafTrig = 0;
+
+	debugData.minLeafDepth = 9999;
+	debugData.maxLeafDepth = 0;
+
+	GetDebugLeaf(bvhObject.Nodes[0], 0);
+}
+
+void ObjReader::GetDebugLeaf(BVHNode node, int depth)
+{
+	if (node.childIndex == 0)
+	{
+		debugData.minLeafTrig = min(debugData.minLeafTrig, node.triangleCount);
+		debugData.maxLeafTrig = max(debugData.maxLeafTrig, node.triangleCount);
+
+		debugData.minLeafDepth = min(debugData.minLeafDepth, depth);
+		debugData.maxLeafDepth = max(debugData.maxLeafDepth, depth);
+		return;
+	}
+
+	GetDebugLeaf(bvhObject.Nodes[node.childIndex], depth + 1);
+	GetDebugLeaf(bvhObject.Nodes[node.childIndex + 1], depth + 1);
 }

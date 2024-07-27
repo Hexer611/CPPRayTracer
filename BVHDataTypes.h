@@ -103,6 +103,15 @@ struct BVHObject
 	std::vector<BVHTriangle> Triangles;
 };
 
+struct BVHObjectDebugData
+{
+	int minLeafTrig;
+	int maxLeafTrig;
+
+	int minLeafDepth;
+	int maxLeafDepth;
+};
+
 struct RawObject
 {
 	std::vector<float3> vertices;

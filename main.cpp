@@ -86,9 +86,14 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 		wchar_t frameText[256];
 		swprintf_s(frameText, L"%d", curFrame);
 
-		if (curFrame % 1 == 0)
+		if (curFrame % 1 == 0 && triangle.isTestVisualizer == 0)
 		{
 			renderer.CreateText(frameText);
+			renderer.Present();
+		}
+		if (triangle.isTestVisualizer == 1)
+		{
+			renderer.CreateDebugText(reader);
 			renderer.Present();
 		}
 		continue;

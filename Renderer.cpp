@@ -87,8 +87,41 @@ void Renderer::CreateText(const wchar_t* text)
 		m_fontPos, DirectX::Colors::White, 0.f, origin);
 
 	m_spriteBatch->End();
+}
 
-	return;
+void Renderer::CreateDebugText(ObjReader reader)
+{
+	DirectX::SimpleMath::Vector2 m_fontPos;
+
+	m_fontPos.x = 200.0;
+	m_fontPos.y = 100.0;
+
+	//m_spriteBatch.reset();
+
+	string debugText = "";
+	debugText.append("Max leaf trig : ");
+	debugText.append(to_string(reader.debugData.maxLeafTrig));
+	debugText.append("\n");
+	debugText.append("Min leaf trig : ");
+	debugText.append(to_string(reader.debugData.minLeafTrig));
+	debugText.append("\n");
+	debugText.append("Max depth trig : ");
+	debugText.append(to_string(reader.debugData.maxLeafDepth));
+	debugText.append("\n");
+	debugText.append("Min depth trig : ");
+	debugText.append(to_string(reader.debugData.minLeafDepth));
+	debugText.append("\n");
+
+	m_spriteBatch->Begin();
+
+	DirectX::SimpleMath::Vector2 origin = m_font->MeasureString(debugText.c_str());
+	origin.x /= 2;
+	origin.y /= 2;
+
+	m_font->DrawString(m_spriteBatch.get(), debugText.c_str(),
+		m_fontPos, DirectX::Colors::White, 0.f, origin, 0.75f);
+
+	m_spriteBatch->End();
 }
 
 void Renderer::Present()
