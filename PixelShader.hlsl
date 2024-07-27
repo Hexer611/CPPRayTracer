@@ -209,6 +209,7 @@ HitInfo BVHRayCollision(int firstNodeIndex, Ray ray, inout int2 stats)
 	while (stackIndex > 0)
 	{
 		BVHNode curNode = Nodes[nodeIndexStack[--stackIndex]];
+        curNode = Nodes[3];
         
 		if (curNode.childIndex == firstNodeIndex)
 		{
@@ -409,7 +410,7 @@ float3 Trace(Ray ray, inout int rngState)
 	float boxVis = stats[0] / 500.;
 	float triVis = stats[1] / 100.;
 
-	int _testType = isTestVisualizer == 1 ? 1 : 3;
+	int _testType = isTestVisualizer == 1 ? 4 : 3;
 	switch (_testType)
 	{
 		case 0:

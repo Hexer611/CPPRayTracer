@@ -68,6 +68,10 @@ struct BVHBoundingBox
 
 	void GrowToInclude(BVHTriangle triangle)
 	{
+		GrowToInclude(triangle.posA);
+		GrowToInclude(triangle.posB);
+		GrowToInclude(triangle.posC);
+		/*
 		float3 triangleMin = triangle.Min();
 		float3 triangleMax = triangle.Max();
 
@@ -78,6 +82,7 @@ struct BVHBoundingBox
 		Max.x = max(triangleMax.x, Max.x);
 		Max.y = max(triangleMax.y, Max.y);
 		Max.z = max(triangleMax.z, Max.z);
+		*/
 	}
 };
 
@@ -101,6 +106,15 @@ struct BVHObject
 	MeshInfo MeshInfo;
 	std::vector<BVHNode> Nodes;
 	std::vector<BVHTriangle> Triangles;
+};
+
+struct BVHObjectDebugData
+{
+	int minLeafTrig;
+	int maxLeafTrig;
+
+	int minLeafDepth;
+	int maxLeafDepth;
 };
 
 struct RawObject

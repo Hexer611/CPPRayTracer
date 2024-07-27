@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 #include <SpriteFont.h>
+#include "BVHDataTypes.h"
+#include "ObjReader.h"
 
 class Renderer {
 public:
@@ -11,6 +13,7 @@ public:
 	void setRenderTarget();
 	void Present();
 	void CreateText(const wchar_t* text);
+	void CreateDebugText(ObjReader reader);
 	void copyRenderTexture(ID3D11Texture2D** target);
 	void saveRenderTexture(const char a[]);
 	void saveRenderTexture(ID3D11Resource* target, const char a[]);

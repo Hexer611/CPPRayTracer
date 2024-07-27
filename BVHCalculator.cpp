@@ -92,7 +92,9 @@ void BVHCalculator::Split(BVHNode *parentNode, int depth)
 	for (int i = parentNode->triangleIndex; i < parentNode->triangleIndex + parentNode->triangleCount; i++)
 	{
 		auto tri = triangles[i];
-		bool inA = tri.Center()[splitAxis] < splitPos;
+		if (tri.Center().x > 2.3)
+			tri.normalA = tri.normalA;
+		bool inA = tri.Center()[splitAxis] <= splitPos;
 		
 		BVHNode *child = inA ? child1 : child2;
 		child->Bounds.GrowToInclude(tri);
@@ -106,6 +108,13 @@ void BVHCalculator::Split(BVHNode *parentNode, int depth)
 			triangles[swapIndex] = swapTri;
 			child2->triangleIndex++;
 		}
+	}
+	float min1 = 9999;
+	float max1 = 0;
+	for (int i = child1->triangleIndex; i < child1->triangleIndex + child1->triangleCount; i++)
+	{
+		min1 = min(min1, triangles[i].Min().x);
+		max1 = max(max1, triangles[i].Max().x);
 	}
 
 	if (child1->triangleCount > 0 && child2->triangleCount > 0)

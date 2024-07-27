@@ -23,10 +23,13 @@ INT WindowHeight;
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 {
 	ObjReader reader;
-	reader.ReadFile("dragonlow.obj", false, float3(0,0,1), float3(), float3(1,1,1)/2);
+	//reader.ReadFile("dragonlow.obj", false, float3(0,0,0.4), float3(0,90,0), float3(1,1,1)/2);
 
 	ObjReader reader1;
-	reader1.ReadFile("suzanne.obj", false, float3(0,0,0), float3(0,-90,0), float3(1,1,1)/2);
+	//reader1.ReadFile("suzanne.obj", false, float3(0,0,-0.4), float3(0,-20,0), float3(1,1,1)/6);
+
+	ObjReader reader2;
+	reader2.ReadFile("fireplace_room_low.obj", false, float3(0, 0, 0), float3(0, -90, 0), float3(1, 1, 1) / 6);
 
 	Window window(1920/2, 1080/2);
 	Renderer renderer(window);
@@ -42,15 +45,16 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	textureUtil.createRenderTextureView(&resultTexture);
 	textureUtil.prevRenderTexture = resultTexture;
 
-	triangle.addData(reader);
-	triangle.addData(reader1);
+	//triangle.addData(reader);
+	//triangle.addData(reader1);
+	triangle.addData(reader2);
 
 	triangle.createBuffers(renderer);
 
 	triangle.draw(renderer);
 	renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 
-	triangle.isTestVisualizer = 0;
+	triangle.isTestVisualizer = 1;
 
 	MSG msg = { 0 };
 	int curFrame = 0;
@@ -78,17 +82,22 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 
 		if (triangle.isTestVisualizer == 0)
 		{
-			//accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
-			//renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
+			accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
+			renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 		}
 
 		curFrame++;
 		wchar_t frameText[256];
 		swprintf_s(frameText, L"%d", curFrame);
 
-		if (curFrame % 1 == 0)
+		if (curFrame % 1 == 0 && triangle.isTestVisualizer == 0)
 		{
 			renderer.CreateText(frameText);
+			renderer.Present();
+		}
+		if (triangle.isTestVisualizer == 1)
+		{
+			renderer.CreateDebugText(reader2);
 			renderer.Present();
 		}
 		continue;
