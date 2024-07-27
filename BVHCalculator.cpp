@@ -75,8 +75,58 @@ void BVHCalculator::Split(BVHNode *parentNode, int depth)
 	if (depth >= 32)
 		return;
 
-	BVHNode *child1 = new BVHNode();
-	BVHNode *child2 = new BVHNode();
+	int minCostSplitAxis = 0;
+	float minCostSplitPos = 0;
+	float minCost = 9999999;
+	
+	for (float splitNormPos = 0.2f; splitNormPos < 1; splitNormPos += 0.2f)
+	{
+		for (int splitAxis = 0; splitAxis < 3; splitAxis++)
+		{
+			float splitPos = parentNode->Bounds.Min[splitAxis] + (parentNode->Bounds.Max[splitAxis] - parentNode->Bounds.Min[splitAxis]) * splitNormPos;
+
+			BVHNode* tmp_child1 = new BVHNode();
+			BVHNode* tmp_child2 = new BVHNode();
+
+			BVHBoundingBox tmp_bound1 = {};
+			BVHBoundingBox tmp_bound2 = {};
+
+			tmp_child1->Bounds = tmp_bound1;
+			tmp_child2->Bounds = tmp_bound2;
+			
+			for (int i = parentNode->triangleIndex; i < parentNode->triangleIndex + parentNode->triangleCount; i++)
+			{
+				auto tri = triangles[i];
+				bool inA = tri.Center()[splitAxis] < splitPos;
+
+				BVHNode* child = inA ? tmp_child1 : tmp_child2;
+				child->Bounds.GrowToInclude(tri);
+				child->triangleCount++;
+			}
+
+			if (tmp_child1->triangleCount == 0 || tmp_child2->triangleCount == 0)
+				continue;
+
+			float curCost = tmp_child1->Bounds.Cost() + tmp_child2->Bounds.Cost();
+			if (curCost < minCost)
+			{
+				minCostSplitAxis = splitAxis;
+				minCostSplitPos = splitPos;
+				minCost = curCost;
+			}
+		}
+	}
+
+	/*
+	float3 size = parentNode->Bounds.Max - parentNode->Bounds.Min;
+	minCostSplitAxis = size.x > std::fmax(size.y, size.z) ? 0 : size.y > size.z ? 1 : 2;
+	minCostSplitPos = parentNode->Bounds.Center()[minCostSplitAxis];*/
+
+	if (minCost == 9999999)
+		return;
+
+	BVHNode* child1 = new BVHNode();
+	BVHNode* child2 = new BVHNode();
 
 	BVHBoundingBox bound1 = {};
 	BVHBoundingBox bound2 = {};
@@ -91,16 +141,12 @@ void BVHCalculator::Split(BVHNode *parentNode, int depth)
 	nodes.push_back(child1);
 	nodes.push_back(child2);
 
-	auto size = parentNode->Bounds.Max - parentNode->Bounds.Min;
-	int splitAxis = size.x > std::fmaxf(size.y, size.z) ? 0 : size.y > size.z ? 1 : 2;
-	float splitPos = parentNode->Bounds.Center()[splitAxis];
-
 	for (int i = parentNode->triangleIndex; i < parentNode->triangleIndex + parentNode->triangleCount; i++)
 	{
 		auto tri = triangles[i];
-		bool inA = tri.Center()[splitAxis] < splitPos;
-		
-		BVHNode *child = inA ? child1 : child2;
+		bool inA = tri.Center()[minCostSplitAxis] < minCostSplitPos;
+
+		BVHNode* child = inA ? child1 : child2;
 		child->Bounds.GrowToInclude(tri);
 		child->triangleCount++;
 

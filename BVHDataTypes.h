@@ -120,6 +120,12 @@ struct BVHBoundingBox
 		return (Max + Min) / 2.0;
 	}
 
+	float Cost()
+	{
+		float3 Size = Max - Min;
+		return Size.x * Size.y * Size.z;
+	}
+
 	void GrowToInclude(float3 point)
 	{
 		Min = float3::Min(Min, point);

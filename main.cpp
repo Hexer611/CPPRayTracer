@@ -23,10 +23,13 @@ INT WindowHeight;
 int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 {
 	ObjReader reader;
-	reader.ReadFile("dragonlow.obj", false, float3(0,0,1), float3(), float3(1,1,1)/2);
+	reader.ReadFile("dragonlow.obj", false, float3(0,0,0), float3(0,180,0), float3(1,1,1));
 
 	ObjReader reader1;
-	reader1.ReadFile("suzanne.obj", false, float3(0,0,0), float3(0,-90,0), float3(1,1,1)/2);
+	//reader1.ReadFile("suzanne.obj", false, float3(0,0,-0.4), float3(0,-20,0), float3(1,1,1)/6);
+
+	ObjReader reader2;
+	//reader2.ReadFile("fireplace_room_low.obj", false, float3(0, 0, 0), float3(0, -90, 0), float3(1, 1, 1) / 6);
 
 	Window window(1920/2, 1080/2);
 	Renderer renderer(window);
@@ -43,7 +46,8 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 	textureUtil.prevRenderTexture = resultTexture;
 
 	triangle.addData(reader);
-	triangle.addData(reader1);
+	//triangle.addData(reader1);
+	//triangle.addData(reader2);
 
 	triangle.createBuffers(renderer);
 
@@ -78,8 +82,8 @@ int CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, INT)
 
 		if (triangle.isTestVisualizer == 0)
 		{
-			//accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
-			//renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
+			accumulator.draw(renderer, textureUtil.prevRenderTexture, textureUtil.currentRenderTexture);
+			renderer.copyRenderTexture(&textureUtil.prevRenderTexture);
 		}
 
 		curFrame++;
