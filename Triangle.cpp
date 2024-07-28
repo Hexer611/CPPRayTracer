@@ -76,13 +76,13 @@ void Triangle::addSpheres(ID3D11DeviceContext* deviceContext)
 	constBuffData.NumberOfRaysPerPixel = 10.0;
 
 	constBuffData.SunLightDirection = float4(0, -1, 0);
-	constBuffData.SkyColorHorizon = float4(1, 0, 0);
-	constBuffData.SkyColorZenith = float4(1, 1, 0);
-	constBuffData.GroundColor = float4(1, 1, 0);
-	constBuffData.SunColor = float4(0, 1, 0);
+	constBuffData.SkyColorHorizon = float4(1, 1, 1);
+	constBuffData.SkyColorZenith = float4(1, 1, 1);
+	constBuffData.GroundColor = float4(1, 1, 1);
+	constBuffData.SunColor = float4(1, 1, 1);
 	constBuffData.SunFocus = 1;
 	constBuffData.SunIntensity = 2;
-	constBuffData.EnvironmentIntensity = 0;
+	constBuffData.EnvironmentIntensity = 0.2;
 	constBuffData.isTestVisualizer = isTestVisualizer;
 	constBuffData.screenWidth = viewPortWidth;
 	constBuffData.screenHeight = viewPortHeight;

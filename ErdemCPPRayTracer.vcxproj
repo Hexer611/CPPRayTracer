@@ -157,6 +157,7 @@
     <ClInclude Include="BVHDataTypes.h" />
     <ClInclude Include="BVHCalculator.h" />
     <ClInclude Include="DataTypes.h" />
+    <ClInclude Include="MtlDataTypes.h" />
     <ClInclude Include="ObjReader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="TextureUtils.h" />

@@ -70,15 +70,6 @@ struct RayTracingMaterial
 	float4 specularColor;
 };
 
-struct HitInfo
-{
-	bool didHit;
-	float dst;
-	float3 hitPoint;
-	float3 normal;
-	RayTracingMaterial material;
-};
-
 struct BVHBoundingBox
 {
 	float3 Min;
@@ -112,8 +103,19 @@ struct Triangle
 {
 	float3 posA, posB, posC;
     float3 normalA, normalB, normalC;
+    float3 color;
     //float _;
     //float _1;
+};
+
+struct HitInfo
+{
+    bool didHit;
+    float dst;
+    float3 hitPoint;
+    float3 normal;
+    RayTracingMaterial material;
+    Triangle lastTriangle;
 };
 
 struct Sphere
@@ -222,7 +224,8 @@ HitInfo BVHRayCollision(int firstNodeIndex, Ray ray, inout int2 stats)
 				if (triHitInfo.didHit && triHitInfo.dst < hitInfo.dst)
 				{
 					hitInfo = triHitInfo;
-				}
+                    hitInfo.lastTriangle = tri;
+                }
 			}
         }
 		else
@@ -288,6 +291,7 @@ HitInfo CalculateRayCollision (Ray ray, inout int2 stats)
             closestHit.normal = normalize(mul(modelLocalToWorldMatrix, float4(hitInfo.normal, 0)));
             closestHit.hitPoint = ray.origin + ray.dir * hitInfo.dst;
             closestHit.material = meshInfo.material;
+            closestHit.material.color = float4(hitInfo.lastTriangle.color, 1);
         }
     }
 

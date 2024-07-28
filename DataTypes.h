@@ -92,6 +92,13 @@ struct float4 {
 		z = _z;
 		w = _w;
 	}
+	float4(float3 _float3, float _w)
+	{
+		x = _float3.x;
+		y = _float3.y;
+		z = _float3.z;
+		w = _w;
+	}
 	float operator[](int index)
 	{
 		switch (index)

@@ -8,6 +8,7 @@
 #include <iostream>
 #include "BVHCalculator.h"
 #include "VectorUtils.h"
+#include "MtlDataTypes.h"
 
 ObjReader::ObjReader()
 {
@@ -71,32 +72,60 @@ int* getFaceIndices(string line, int offset)
 	return ints;
 }
 
-void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, float3 rot, float3 scale)
+vector<MtlMaterial> ReadMtlFile(string filePath)
 {
-	std::ifstream infile(filePath);
+	vector<MtlMaterial> materials = {};
+
+	filePath.replace(filePath.size() - 3, 3, "mtl");
+	std::ifstream infile(filePath.c_str());
+
+	if (!infile.good())
+		return materials;
+
+	std::string line;
+	MtlMaterial curMaterial = {};
+
+	while (std::getline(infile, line))
+	{
+		if (line.rfind("newmtl", 0) == 0)
+		{
+			materials.push_back(curMaterial);
+			curMaterial = {};
+			curMaterial.name = line.substr(7, line.size() - 7);
+		}
+		if (line[0] == 'K' && line[1] == 'd')
+		{
+			float3 diffuseColor = getFLoat3OfString(line, 3);
+			curMaterial.diffuseColor = diffuseColor;
+		}
+	}
+}
+
+void ObjReader::ReadFile(string filePath, bool flattenFaces, float3 pos, float3 rot, float3 scale)
+{
+	vector<MtlMaterial> materials = ReadMtlFile(filePath);
+	std::ifstream infile(filePath.c_str());
 	std::string line;
 
 	std::vector<float3> vertices = {};
 	std::vector<int> trianglesv = {}; // Vertex index
 	std::vector<int> trianglesvt = {}; // Vertex tangen index
 	std::vector<int> trianglesvn = {}; // Vertex normal index
+	std::vector<int> colors = {}; // Materials
 	std::vector<float3> normals = {};
+	int currentMaterialIndex = -1;
 
 	while (std::getline(infile, line))
 	{
 		if (line[0] == 'v' && line[1] == 'n')
 		{
-			//std::vector<std::string> v = split(line, ' ');
-			//float3 newNormal = float3(std::stof(v[1]), std::stof(v[2]), std::stof(v[3]));
 			normals.push_back(getFLoat3OfString(line, 3));
 		}
-		if (line[0] == 'v' && line[1] == ' ')
+		else if (line[0] == 'v' && line[1] == ' ')
 		{
-			//std::vector<std::string> v = split(line, ' ');
-			//float3 newVector = float3(std::stof(v[1]), std::stof(v[2]), std::stof(v[3]));
 			vertices.push_back(getFLoat3OfString(line, 2));
 		}
-		if (line[0] == 'f' && line[1] == ' ')
+		else if (line[0] == 'f' && line[1] == ' ')
 		{
 			int* intArray = getFaceIndices(line, 2);
 			if (intArray == nullptr)
@@ -113,26 +142,19 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, f
 			trianglesvn.push_back(intArray[2]);
 			trianglesvn.push_back(intArray[5]);
 			trianglesvn.push_back(intArray[8]);
-			continue;
-			std::vector<std::string> v = split(line, ' ');
-			if (v.size() > 4) // We don't support triangles with more than 3 vertices (first index is 'f')
-				continue;
 
-			for (int i = 1; i < 4; i++)
+			colors.push_back(currentMaterialIndex);
+		}
+		else if (line.rfind("usemtl", 0) == 0)
+		{
+			string curName = line.substr(7, line.size() - 7);
+
+			for (int i = 0; i < materials.size(); i++)
 			{
-				int vertexIndex = 0;
-				int vertexUVIndex = 0;
-				int vertexNormalIndex = 0;
-
-				std::string curString = "";
-
-				std::vector<std::string> vv = split(v[i], '/');
-				if (vv[0] != "")
-					trianglesv.push_back(std::stoi(vv[0]));
-				if (vv[1] != "")
-					trianglesvt.push_back(std::stoi(vv[1]));
-				if (vv[2] != "")
-					trianglesvn.push_back(std::stoi(vv[2]));
+				if (materials[i].name == curName)
+				{
+					currentMaterialIndex = i;
+				}
 			}
 		}
 	}
@@ -177,10 +199,13 @@ void ObjReader::ReadFile(const char filePath[], bool flattenFaces, float3 pos, f
 	rawObject.vertices = vertices;
 	rawObject.normals = finalnormals;
 	rawObject.triangles = trianglesv;
+	rawObject.colorIndices = colors;
+	rawObject.materials = materials;
 
 	BVHCalculator calculator;
 	bvhObject = calculator.CalculateBVH(rawObject);
 
+	bvhObject.MeshInfo.material.color = float4(materials[24].diffuseColor, 1);
 	bvhObject.MeshInfo.modelLocalToWorldMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale);
 	bvhObject.MeshInfo.modelWorldToLocalMaxtix = VectorUtils::CreateWorldToLocalMatrix(pos, rot, scale).Invert();
 

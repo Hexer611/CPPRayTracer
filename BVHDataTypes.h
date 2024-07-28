@@ -2,6 +2,8 @@
 #include "DataTypes.h"
 #include <vector>
 #include <limits>
+#include "MtlDataTypes.h"
+
 using namespace std;
 
 struct MeshInfo
@@ -23,6 +25,7 @@ struct BVHTriangleData
 {
 	float3 posA, posB, posC;
 	float3 normalA, normalB, normalC;
+	float3 color;
 };
 
 struct BVHTriangle
@@ -55,6 +58,7 @@ private:
 		_normal = _normal.Normalize();
 	}
 public:
+	float3 color;
 	BVHTriangle(float3 _posA, float3 _posB, float3 _posC)
 	{
 		posA = _posA;
@@ -99,6 +103,8 @@ public:
 		trigData.normalA = normalA;
 		trigData.normalB = normalB;
 		trigData.normalC = normalC;
+
+		trigData.color = color;
 
 		return trigData;
 	}
@@ -183,4 +189,6 @@ struct RawObject
 	std::vector<float3> vertices;
 	std::vector<float3> normals;
 	std::vector<int> triangles;
+	std::vector<int> colorIndices;
+	std::vector<MtlMaterial> materials;
 };

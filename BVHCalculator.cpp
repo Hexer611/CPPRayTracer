@@ -39,6 +39,10 @@ BVHObject BVHCalculator::CalculateBVH(RawObject rawObject)
 			rawObject.normals[i + 2]
 		);
 
+		int materialIndex = rawObject.colorIndices[i / 3];
+		if (materialIndex != -1)
+			tri.color = rawObject.materials[materialIndex].diffuseColor;
+
 		trigs.push_back(tri);
 	}
 
